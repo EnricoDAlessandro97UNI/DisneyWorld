@@ -20,139 +20,135 @@
 
 #define M2 12
 
+
+/***************************** GLOBAL VARIABLES *************************************/
+
+static int init = 1;
+
+static struct {
+    double arrival;                 /* next arrival time                   */
+    double completion;              /* next completion time                */
+    double current;                 /* current time                        */
+    double next;                    /* next (most imminent) event time     */
+    double last;                    /* last arrival time                   */
+} t;
+
+static struct {
+    double node;                    /* time integrated number in the node  */
+    double queue;                   /* time integrated number in the queue */
+    double service;                 /* time integrated number in service   */
+} area = {0.0, 0.0, 0.0};
+
+static long processedJobs = 0;                  /* used to count departed jobs         */
+static long number = 0;                  /* number in the node                  */
+
+static double lastArrival = 0.0;
+
+static int nextEvent;        /* Next event type */
+static double depTime = 0;
+/************************************************************************************/
+
+
 double get_service_block_two() {
     SelectStream(2);
     return (Exponential(M2));
 }
 
-void *block2() {
+static void process_arrival() {
+    number++;
+    t.arrival = t.current;
+    lastArrival = t.arrival;
+    if (number == 1)
+        t.completion = t.current + get_service_block_two();
+}
 
-    FILE *fp;
-
-    struct {
-        double arrival;                 /* next arrival time                   */
-        double completion;              /* next completion time                */
-        double current;                 /* current time                        */
-        double next;                    /* next (most imminent) event time     */
-        double last;                    /* last arrival time                   */
-    } t;
-    struct {
-        double node;                    /* time integrated number in the node  */
-        double queue;                   /* time integrated number in the queue */
-        double service;                 /* time integrated number in service   */
-    } area = {0.0, 0.0, 0.0};
-    long index = 0;                  /* used to count departed jobs         */
-    long number = 0;                  /* number in the node                  */
-
-    double lastArrival = 0.0;
-
-    t.current = START;              /* set the clock                         */
-    t.arrival = INFINITY;           /* schedule the first arrival            */
-    t.completion = INFINITY;        /* the first event can't be a completion */
-
-    int nextEvent;        /* Next event type */
-    double depTime = 0;
-
-    struct sembuf oper;
-    /* Unlock the orchestrator */
-    oper.sem_num = 0;
-    oper.sem_op = 1;
-    oper.sem_flg = 0;
-    semop(mainSem, &oper, 1);
-
-    while (1) {
-
-        /* Wait for the start from the orchestrator */
-        oper.sem_num = 1;
-        oper.sem_op = -1;
-        oper.sem_flg = 0;
-        semop(sem, &oper, 1);
-
-        /* Check for the end of the simulation */
-        if (endSimulation == 1) {
-            update_next_event(2, INFINITY, -1);
-            oper.sem_num = 0;
-            oper.sem_op = 1;
-            oper.sem_flg = 0;
-            semop(mainSem, &oper, 1);
-            break;
-        }
-
-        //printf("\n-------- BLOCK 2 --------\n");
-
-        nextEvent = get_next_event_type(2);
-        t.next = get_next_event_time(2);  /* next event time */
-
-        if (number > 0 && t.next != INFINITY) {  /* update integrals  */
-            area.node += (t.next - t.current) * number;
-            area.queue += (t.next - t.current) * (number - 1);
-            area.service += (t.next - t.current);
-        }
-        t.current = t.next; /* advance the clock */
-
-        if (nextEvent == 0) { /* Process an arrival */
-
-            number++;
-
-            t.arrival = t.current;
-            lastArrival = t.arrival;
-
-            if (number == 1)
-                t.completion = t.current + get_service_block_two();
-        } 
-        else { /* Process a completion */
-
-            depTime = t.current;
-
-            index++;
-            number--;
-            if (number > 0) {
-                t.completion = t.current + get_service_block_two();
-            }
-            else {
-                t.completion = INFINITY;
-            }
-
-            /* Return departure to the orchestrator */
-            departureInfo.blockNum = 2;
-            departureInfo.time = depTime;
-        }
-
-        update_next_event(2, t.completion, 1);
-
-        //printf("--------------------------\n\n");
-
-        oper.sem_num = 0;
-        oper.sem_op = 1;
-        oper.sem_flg = 0;
-        semop(mainSem, &oper, 1);
+static void process_departure() {
+    depTime = t.current;
+    processedJobs++;
+    number--;
+    if (number > 0) {
+        t.completion = t.current + get_service_block_two();
     }
+    else {
+        t.completion = INFINITY;
+    }
+    /* Return departure to the orchestrator */
+    departureInfo.blockNum = 2;
+    departureInfo.time = depTime;
+}
 
-    //printf("\nBLOCK2: Terminated, waiting for the orchestrator...\n");
-    oper.sem_num = 1;
-    oper.sem_op = -1;
-    oper.sem_flg = 0;
-    semop(sem,&oper,1);
+static void print_statistics() {
+    //FILE *fp;
 
     printf("\nBLOCK 2 STATISTICS:");
 
-    printf("\nfor %ld jobs\n", index);
-    printf("   average interarrival time = %6.2f\n", lastArrival / index);
-    printf("   average wait ............ = %6.2f\n", area.node / index);
-    printf("   average delay ........... = %6.2f\n", area.queue / index);
-    printf("   average service time .... = %6.2f\n", area.service / index);
+    printf("\nfor %ld jobs\n", processedJobs);
+    printf("   average interarrival time = %6.2f\n", lastArrival / processedJobs);
+    printf("   average wait ............ = %6.2f\n", area.node / processedJobs);
+    printf("   average delay ........... = %6.2f\n", area.queue / processedJobs);
+    printf("   average service time .... = %6.2f\n", area.service / processedJobs);
     printf("   average # in the node ... = %6.2f\n", area.node / t.current);
     printf("   average # in the queue .. = %6.2f\n", area.queue / t.current);
     printf("   utilization ............. = %6.2f\n", area.service / t.current);
 
     /* Write statistics on files */
-    fp = fopen(FILENAME_WAIT_BLOCK2, "a");
-    fprintf(fp,"%6.6f\n", area.node / index);
-    fclose(fp);
+    // fp = fopen(FILENAME_WAIT_BLOCK2, "a");
+    // fprintf(fp,"%6.6f\n", area.node / processedJobs);
+    // fclose(fp);
 
-    fp = fopen(FILENAME_DELAY_BLOCK2, "a");
-    fprintf(fp,"%6.6f\n", area.queue / index);
-    fclose(fp);
+    // fp = fopen(FILENAME_DELAY_BLOCK2, "a");
+    // fprintf(fp,"%6.6f\n", area.queue / processedJobs);
+    // fclose(fp);
+}
 
-    return (0);
+void block2() {
+
+    /* Check if initialization of structures is needed */
+    if (init == 1) {
+        
+        t.current = START;              /* set the clock                         */
+        t.arrival = INFINITY;           /* schedule the first arrival            */
+        t.completion = INFINITY;        /* the first event can't be a completion */
+
+        init = 0;
+    }
+
+    /* Check for the end of the simulation */
+    if (endSimulation == 1) {
+        update_next_event(2, INFINITY, -1);
+        print_statistics();
+        init = 1; /* re-enable initialization */
+        
+        processedJobs = 0;           /* used to count departed jobs         */
+        number = 0;                  /* number in the node                  */
+
+        lastArrival = 0.0;
+
+        depTime = 0;
+
+        return;
+    }
+
+    //printf("\n-------- BLOCK 2 ACTIVATED --------\n");
+
+    nextEvent = get_next_event_type(2);
+    t.next = get_next_event_time(2);  /* next event time */
+
+    if (number > 0 && t.next != INFINITY) {  /* update integrals  */
+        area.node += (t.next - t.current) * number;
+        area.queue += (t.next - t.current) * (number - 1);
+        area.service += (t.next - t.current);
+    }
+    t.current = t.next; /* advance the clock */
+
+    if (nextEvent == 0) { /* Process an arrival */
+        //printf("\nBLOCK2: Processing an arrival...\n");
+        process_arrival();
+    } 
+    else { /* Process a completion */
+        //printf("\nBLOCK2: Processing a departure...\n");
+        process_departure();
+    }
+
+    update_next_event(2, t.completion, 1);
 }

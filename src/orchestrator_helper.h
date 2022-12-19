@@ -39,28 +39,16 @@ typedef struct departure_info {
     double time;    /* Departure time */
 } departure_info;
 
-/* stuttura utilizzata dai blocchi per ritornare una partenza */
-typedef struct block_queue {
-    int block;
-    double time;
-    struct block_queue *next;
-} block_queue;
 
 /* -------------- GLOBAL VARIABLES -------------- */
 extern global_info globalInfo[6];
-
 extern departure_info departureInfo;
-
-extern int sem;
-extern int mainSem;
 
 extern int stopFlag;
 extern int stopFlag2;
 
 extern int block4Lost;
 extern int block4ToExit;
-
-extern int whoIsFree[5];
 
 extern int endSimulation;
 /* ---------------------------------------------- */
@@ -76,6 +64,5 @@ int get_next_event_type(int blockNum);
 double get_next_event_time(int blockNum);
 void update_next_event(int blockNum, double time, int eventType);
 double get_probability();
-int unlock_waiting_threads();
 
 #endif 

@@ -5,7 +5,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <sys/sem.h>
-#include <pthread.h>
 #include "rngs.h"
 #include "orchestrator_helper.h"
 
@@ -52,7 +51,6 @@ void create_statistics_files() {
 /* Initializes the initial state of the global_info structure  */
 void init_global_info_structure() {
     /* Initializes first block */
-    whoIsFree[0] = 0;
     globalInfo[0].time = 0;         /* The first block must have the most immininent event */
     globalInfo[0].eventType = 0;    /* At the beginning all the blocks await an arrival */
 
@@ -60,7 +58,6 @@ void init_global_info_structure() {
     for (int i=1; i<=5; i++) {
         globalInfo[i].time = INFINITY;  /* The other blocks have an infinite time  */
         globalInfo[i].eventType = 0;    /* At the beginning all the blocks await an arrival */
-        whoIsFree[i] = 0;
     }
 }
 
@@ -98,19 +95,4 @@ void update_next_event(int blockNum, double time, int eventType) {
 double get_probability() {
     SelectStream(6);
     return Uniform(0.0, 1.0);
-}
-
-int unlock_waiting_threads() {
-
-    struct sembuf oper;
-    
-    /* sblocco tutti i thread in ordine in modo che terminino */
-    for (int i=0; i<5; i++) {
-        oper.sem_num = i;
-        oper.sem_op = 1;
-        oper.sem_flg = 0;
-        semop(sem, &oper, 1);
-    }
-    
-    return 0;
 }

@@ -5,8 +5,8 @@
 #
 
 CC = gcc
-CFLAGS = -g -Wall
-LDFLAGS = -lm -lpthread
+CFLAGS = -g -Wall -Wextra
+LDFLAGS = -lm
 
 OBJFILES = block1 block2 block3 block4 block5 simu rgns.o simul batch
 
