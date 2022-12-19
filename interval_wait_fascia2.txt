@@ -1,0 +1,13 @@
+VALIDAZIONE:
+
+	Ripetizioni 256 fascia 2:
+		Blocco 1:
+			E(Ts) = 289.751105 +/- 17.316670
+		Blocco 2:
+			E(Ts) = 26.127011 +/- 0.329391
+		Blocco 3:
+			E(Ts) = 16.170336 +/- 0.051203
+		Blocco 4:
+			E(Ts) = 113.189292 +/- 0.762963
+		Blocco 5:
+			E(Ts) = 96.647871 +/- 1.778983

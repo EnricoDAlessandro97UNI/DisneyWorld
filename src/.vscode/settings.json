@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "orchestrator_helper.h": "c",
+        "block4_helper.h": "c",
+        "block2_helper.h": "c",
+        "math.h": "c",
+        "rngs.h": "c",
+        "sem.h": "c"
+    }
+}

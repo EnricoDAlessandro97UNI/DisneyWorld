@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "finite_helper.h": "c",
+        "pthread.h": "c",
+        "block3_helper.h": "c"
+    }
+}
