@@ -119,6 +119,10 @@ void block2() {
         print_statistics();
         init = 1; /* re-enable initialization */
         
+        area.node = 0.0;
+        area.queue = 0.0;
+        area.service = 0.0;
+
         processedJobs = 0;           /* used to count departed jobs         */
         number = 0;                  /* number in the node                  */
 

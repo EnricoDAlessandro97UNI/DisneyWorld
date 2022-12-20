@@ -7,9 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/sem.h>
 #include <math.h>
-#include <pthread.h>
 
 #include "block4_helper.h"
 #include "../finite_helper.h"
@@ -18,12 +16,51 @@
 #define SERVERS_FOUR_F2 30  /* number of servers time slot 2 */
 #define M4 100
 
+/***************************** GLOBAL VARIABLES *************************************/
+
+static int init = 1;
+
 /* the next-event structure */
 typedef struct {  
     double t;   /* next event time      */
     int x;      /* event status, 0 or 1 */
     int status; /* 0 = server down, 1 = server up */
 } event_list_four[MAX_SERVERS];
+
+static struct
+{
+    double current; /* current time                       */
+    double next;    /* next (most imminent) event time    */
+} t;
+
+static struct
+{                   /* accumulated sums of  */
+    double service; /*   service times      */
+    long served;    /*   number served      */
+} sum[MAX_SERVERS];
+
+static event_list_four event; /* The next-event list */
+
+static int numberOfServers = SERVERS_FOUR_F1; /* current number of servers */
+static int newAvailableServers = 0;
+static long totalArr = 0;
+
+static long number = 0;    /* number in the node                 */
+static long queue = 0;     /* number of jobs in the queue        */    
+static int e;              /* next event index                   */
+static int s;              /* server index                       */
+static long processedJobs = 0;     /* used to count processed jobs       */
+static double area = 0.0;  /* time integrated number in the node */
+
+static double depTime = 0.0; /* departure time */
+
+static double service;
+static double lastArrival = 0.0;
+static double totalService = 0.0;
+static double avgService = 0.0;
+static double totalUtilization = 0.0;
+
+/************************************************************************************/
 
 double get_service_block_four(void) {
     SelectStream(4);
@@ -90,43 +127,7 @@ void change_servers_status_four(event_list_four event, int servers) {
     }
 }
 
-void *block4() 
-{
-    FILE *fp;
-
-    struct
-    {
-        double current; /* current time                       */
-        double next;    /* next (most imminent) event time    */
-    } t;
-
-    struct
-    {                   /* accumulated sums of  */
-        double service; /*   service times      */
-        long served;    /*   number served      */
-    } sum[MAX_SERVERS];
-
-    event_list_four event; /* The next-event list */
-
-    int numberOfServers = SERVERS_FOUR_F1; /* current number of servers */
-    int newAvailableServers = 0;
-    long totalArr = 0;
-
-    long number = 0;    /* number in the node                 */
-    long queue = 0;     /* number of jobs in the queue        */    
-    int e;              /* next event index                   */
-    int s;              /* server index                       */
-    long index = 0;     /* used to count processed jobs       */
-    double area = 0.0;  /* time integrated number in the node */
-
-    double depTime = 0.0; /* departure time */
-
-    double service;
-    double lastArrival = 0.0;
-    double totalService = 0.0;
-    double avgService = 0.0;
-    double totalUtilization = 0.0;
-
+static void init_block() {
     /* Initialize arrival event */
     t.current = START;
 
@@ -143,192 +144,83 @@ void *block4()
         sum[s].served = 0;
     }
 
-    struct sembuf oper;
-    /* Unlock the orchestrator */
-    oper.sem_num = 0;
-    oper.sem_op = 1;
-    oper.sem_flg = 0;
-    semop(mainSem, &oper, 1);
+    numberOfServers = SERVERS_FOUR_F1; /* current number of servers */
+    newAvailableServers = 0;
+    totalArr = 0;
 
-    while (1) 
-    {
-        /* Wait for the start from the orchestrator */
-        oper.sem_num = 3;
-        oper.sem_op = -1;
-        oper.sem_flg = 0;
-        semop(sem, &oper, 1);
+    number = 0;    /* number in the node                 */
+    queue = 0;     /* number of jobs in the queue        */   
+    processedJobs = 0;     /* used to count processed jobs       */
+    area = 0.0;  /* time integrated number in the node */
 
-        /* Check for the end of the simulation */
-        if (endSimulation == 1) {
-            break;
-            /*
-            update_next_event(4, INFINITY, -1);
-            printf("Unlock Main 4\n");
-            oper.sem_num = 0;
-            oper.sem_op = 1;
-            oper.sem_flg = 0;
-            semop(mainSem, &oper, 1);
-            break;
-            */
-        }
+    depTime = 0.0; /* departure time */
 
-        /* Check for server configuration change */
-        if (changeConfig == 1)
-        {
-            // gestire il cambio configurazione e sbloccare il semaforo per il main
-            // ricordarsi di aggiornare il minimo evento di questo blocco
+    lastArrival = 0.0;
+    totalService = 0.0;
+    avgService = 0.0;
+    totalUtilization = 0.0;
 
-            numberOfServers = SERVERS_FOUR_F2;
-            change_servers_status_four(event, numberOfServers);
+    init = 0;
+}
 
-            /* Assegna i job in coda immediatamente ai nuovi server (se più dei precedenti) */
-            if (SERVERS_FOUR_F2 > SERVERS_FOUR_F1)
-            {
-                newAvailableServers = SERVERS_FOUR_F2 - SERVERS_FOUR_F1;
-            }
-            while (queue > 0)
-            {
-                if (newAvailableServers > 0)
-                {
-                    /* se nel sistema ci sono al più tanti job quanti i server allora calcola un tempo di servizio */
-                    service = get_service_block_four();
-                    s = find_one_block_four(event);
-                    sum[s].service += service;
-                    sum[s].served++;
-                    event[s].t = lastArrival + service; /* Aggiorna l'istante del prossimo evento su quel server (partenza) */
-                    event[s].x = 1;
-                    queue--;
-                    newAvailableServers--;
-                }
-                else
-                    break;
-            }
+static void process_arrival() {
+    number++;
 
-            /* Update the most imminent event of this block */
-            /* L' orchestrator deve sapere quale sarà il prossimo evento di questo blocco */
-            e = next_event_block_four(event); /* next event index */
-            if (e != -1)
-            {
-                update_next_event(4, event[e].t, 1); /* There is a next event for this block, update the global_info */
-            }
-            else
-            {
-                update_next_event(4, INFINITY, 0);
-            }
+    totalArr++;
 
-            /* Unlock the orchestrator */
-            oper.sem_num = 0;
-            oper.sem_op = 1;
-            oper.sem_flg = 0;
-            semop(mainSem, &oper, 1);
+    if (number <= numberOfServers) {
+        /* se nel sistema ci sono al più tanti job quanti i server allora calcola un tempo di servizio */
+        lastArrival = t.current;
+        service = get_service_block_four();
+        s = find_one_block_four(event); 
+        sum[s].service += service;
+        sum[s].served++;
+        event[s].t = t.current + service; /* Aggiorna l'istante del prossimo evento su quel server (partenza) */
+        event[s].x = 1;
+    }
+    else 
+        queue++;
 
-            continue;
-        }
+    lastArrival = t.current;
+}
 
-        //printf("\n-------- BLOCK 4 --------\n");
+static void process_departure() {
+    processedJobs++;
+    number--; /* il job è stato completato */
+    s = e;
 
-        /* Find next event index */
-        if (get_next_event_type(4) == 0) { /* Next event is an arrival */
-            t.next = get_next_event_time(4);
-        }
-        else {  /* Next event is a completition, find the server that has finished */
-            e = next_event_block_four(event);
-            t.next = event[e].t;                   /* next event time  */
-        }
-
-        area += (t.next - t.current) * number; /* update integral  */
-        t.current = t.next;                    /* advance the clock*/
-
-        /* For global wait statistics */
-        if (index == 0) /* Statistics not yet ready */
-            glblWaitBlockFour = 0.0;
-        else 
-            glblWaitBlockFour = area / index;
-
-        if (get_next_event_type(4) == 0) { /* Process an arrival */
-
-            //printf("\nBLOCK4: Processing an arrival...\n");
-            number++;
-
-            totalArr++;
-
-            if (number <= numberOfServers) {
-                /* se nel sistema ci sono al più tanti job quanti i server allora calcola un tempo di servizio */
-                lastArrival = t.current;
-                service = get_service_block_four();
-                s = find_one_block_four(event); 
-                sum[s].service += service;
-                sum[s].served++;
-                event[s].t = t.current + service; /* Aggiorna l'istante del prossimo evento su quel server (partenza) */
-                event[s].x = 1;
-            }
-            else 
-                queue++;
-
-            lastArrival = t.current;
-        }
-        else { /* Process a departure from server s */
-
-            //printf("\nBLOCK4: Processing a departure...\n");
-            index++;
-            number--; /* il job è stato completato */
-            s = e;
-
-            //printf("\tDeparture: %6.2f\n", event[s].t);
-            depTime = event[s].t;
-            if ((number >= numberOfServers) && (event[s].status == 1))
-            { /* se ci sono job in coda allora assegniamo un nuovo job
-             con un nuovo tempo di servizio al
-             server appena liberato */
-                queue--;  
-                service = get_service_block_four();
-                sum[s].service += service;
-                sum[s].served++;
-                event[s].t = t.current + service; /* Aggiorna l'istante del prossimo evento su quel server (partenza) */
-            }
-            else
-            { /* altrimenti quel server resta idle */
-                event[s].x = 0; 
-            }
-
-            /* Prepare le info di ritorno per l'orchestrator */
-            departureInfo.blockNum = 4;
-            departureInfo.time = depTime;
-        }
-
-        /* L' orchestrator deve sapere quale sarà il prossimo evento di questo blocco */
-        e = next_event_block_four(event); /* next event index */
-        if (e != -1) {
-            update_next_event(4, event[e].t, 1); /* There is a next event for this block, update the global_info */
-        }
-        else {
-            update_next_event(4, INFINITY, -1);
-        }
-
-        //printf("--------------------------\n\n");
-
-        oper.sem_num = 0;
-        oper.sem_op = 1;
-        oper.sem_flg = 0;
-        semop(mainSem, &oper, 1);
+    //printf("\tDeparture: %6.2f\n", event[s].t);
+    depTime = event[s].t;
+    if ((number >= numberOfServers) && (event[s].status == 1))
+    { /* se ci sono job in coda allora assegniamo un nuovo job
+        con un nuovo tempo di servizio al
+        server appena liberato */
+        queue--;  
+        service = get_service_block_four();
+        sum[s].service += service;
+        sum[s].served++;
+        event[s].t = t.current + service; /* Aggiorna l'istante del prossimo evento su quel server (partenza) */
+    }
+    else
+    { /* altrimenti quel server resta idle */
+        event[s].x = 0; 
     }
 
-    //printf("\nBLOCK4: Terminated, waiting for the orchestrator...\n");
-    /*
-    oper.sem_num = 3;
-    oper.sem_op = -1;
-    oper.sem_flg = 0;
-    semop(sem,&oper,1);
-    */
+    /* Prepare le info di ritorno per l'orchestrator */
+    departureInfo.blockNum = 4;
+    departureInfo.time = depTime;
+}
 
-    //printf("\nBLOCK 4 STATISTICS");
-    /*
-    printf("\n\nfor %ld jobs, lost %d, pushed to exit %d\n", index, block4Lost, block4ToExit);
-    printf("  avg interarrivals .. = %6.2f\n", lastArrival / index);
-    printf("  avg wait ........... = %6.2f\n", area / index);
+static void print_statistics() {
+    //FILE *fp;
+    printf("\nBLOCK 4 STATISTICS");
+    
+    printf("\n\nfor %ld jobs, lost %d, pushed to exit %d\n", processedJobs, block4Lost, block4ToExit);
+    printf("  avg interarrivals .. = %6.2f\n", lastArrival / processedJobs);
+    printf("  avg wait ........... = %6.2f\n", area / processedJobs);
     printf("  avg # in node ...... = %6.2f\n", area / t.current);
-    */
-    //printf("\n\n[BLOCCO4]: Processed jobs %ld, arrivals %ld\n", index, totalArr);
+    
+    printf("\n\n[BLOCCO4]: Processed jobs %ld, arrivals %ld\n", processedJobs, totalArr);
 
     /* Write statistics on file */
     /*
@@ -371,6 +263,102 @@ void *block4()
     */
 
     // printf("\n");
+}
 
-    pthread_exit((void *)0);
+void block4() 
+{
+    /* Check if initialization of structures is needed */
+    if (init == 1) {
+        init_block();
+    } 
+
+    /* Check for the end of the simulation */
+    if (endSimulation == 1) {
+        update_next_event(4, INFINITY, -1);
+        print_statistics();
+        init = 1;
+
+        return;
+    }
+
+    /* Check for server configuration change */
+    if (changeConfig == 1)
+    {
+        numberOfServers = SERVERS_FOUR_F2;
+        change_servers_status_four(event, numberOfServers);
+
+        /* Assegna i job in coda immediatamente ai nuovi server (se più dei precedenti) */
+        if (SERVERS_FOUR_F2 > SERVERS_FOUR_F1)
+        {
+            newAvailableServers = SERVERS_FOUR_F2 - SERVERS_FOUR_F1;
+        }
+        while (queue > 0)
+        {
+            if (newAvailableServers > 0)
+            {
+                /* se nel sistema ci sono al più tanti job quanti i server allora calcola un tempo di servizio */
+                service = get_service_block_four();
+                s = find_one_block_four(event);
+                sum[s].service += service;
+                sum[s].served++;
+                event[s].t = lastArrival + service; /* Aggiorna l'istante del prossimo evento su quel server (partenza) */
+                event[s].x = 1;
+                queue--;
+                newAvailableServers--;
+            }
+            else
+                break;
+        }
+
+        /* Update the most imminent event of this block */
+        /* L' orchestrator deve sapere quale sarà il prossimo evento di questo blocco */
+        e = next_event_block_four(event); /* next event index */
+        if (e != -1) {
+            update_next_event(4, event[e].t, 1); /* There is a next event for this block, update the global_info */
+        }
+        else {
+            update_next_event(4, INFINITY, 0);
+        }
+
+        return;
+    }
+
+    //printf("\n-------- BLOCK 4 ACTIVATED --------\n");
+
+    /* Find next event index */
+    if (get_next_event_type(4) == 0) { /* Next event is an arrival */
+        t.next = get_next_event_time(4);
+    }
+    else {  /* Next event is a completition, find the server that has finished */
+        e = next_event_block_four(event);
+        t.next = event[e].t;                   /* next event time  */
+    }
+
+    area += (t.next - t.current) * number; /* update integral  */
+    t.current = t.next;                    /* advance the clock*/
+
+    /* For global wait statistics */
+    if (processedJobs == 0) /* Statistics not yet ready */
+        glblWaitBlockFour = 0.0;
+    else 
+        glblWaitBlockFour = area / processedJobs;
+
+    if (get_next_event_type(4) == 0) { /* Process an arrival */
+        //printf("\nBLOCK4: Processing an arrival...\n");
+        process_arrival();
+    }
+    else { /* Process a departure from server s */
+        //printf("\nBLOCK4: Processing a departure...\n");
+        process_departure();
+    }
+
+    /* L' orchestrator deve sapere quale sarà il prossimo evento di questo blocco */
+    e = next_event_block_four(event); /* next event index */
+    if (e != -1) {
+        update_next_event(4, event[e].t, 1); /* There is a next event for this block, update the global_info */
+    }
+    else {
+        update_next_event(4, INFINITY, -1);
+    }
+    
 }

@@ -4,8 +4,6 @@
  */
 #include <math.h>
 #include <stdlib.h>
-#include <sys/sem.h>
-#include <pthread.h>
 #include "rngs.h"
 #include "finite_helper.h"
 
@@ -107,19 +105,4 @@ void update_next_event(int blockNum, double time, int eventType) {
 double get_probability() {
     SelectStream(6);
     return Uniform(0.0, 1.0);
-}
-
-int unlock_waiting_threads() {
-
-    struct sembuf oper;
-    
-    /* sblocco tutti i thread in ordine in modo che terminino */
-    for (int i=0; i<5; i++) {
-        oper.sem_num = i;
-        oper.sem_op = 1;
-        oper.sem_flg = 0;
-        semop(sem, &oper, 1);
-    }
-    
-    return 0;
 }

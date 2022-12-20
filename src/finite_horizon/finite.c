@@ -1,12 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/sem.h>
 #include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/mman.h>
-#include <sys/wait.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <math.h>
 
 #include "finite_helper.h"
@@ -17,12 +12,8 @@
 #include "block5_storage/block5_helper.h"
 
 /* ----------- GLOBAL EXTERN VARIABLES ----------- */
-pthread_t tid[5];
 global_info globalInfo[8];
 departure_info departureInfo;
-
-int sem;
-int mainSem;
 
 int endSimulation;
 int changeConfig;
@@ -39,43 +30,6 @@ double glblWaitBlockFive;
 int updateStatistics;
 /* ----------------------------------------------- */
 
-/* Creation of threads for block management */
-void create_threads() {
-
-    int ret;
-
-    ret = pthread_create(&tid[0], NULL, block1, NULL);
-    if(ret != 0){
-        perror("pthread create error\n");
-        exit(1);
-    }
-
-    ret = pthread_create(&tid[1], NULL, block2, NULL);
-    if(ret != 0){
-        perror("pthread create error\n");
-        exit(1);
-    }
-    
-    ret = pthread_create(&tid[2], NULL, block3, NULL);
-    if(ret != 0){
-        perror("pthread create error\n");
-        exit(1);
-    }   
-    
-    ret = pthread_create(&tid[3], NULL, block4, NULL);
-    if(ret != 0){
-        perror("pthread create error\n");
-        exit(1);
-    }
-
-    ret = pthread_create(&tid[4], NULL, block5, NULL);
-    if(ret != 0){
-        perror("pthread create error\n");
-        exit(1);
-    }
-}
-
-
 int main() {
 
     FILE *fp;
@@ -90,27 +44,6 @@ int main() {
     double currentSamplingInterval = SAMPLING;
     double glblWait = 0.0;
 
-    struct sembuf oper;
-
-    key_t key = IPC_PRIVATE;
-    key_t mkey = IPC_PRIVATE;
-
-    system("clear");
-
-    /* Initializes main semaphore */
-    mainSem = semget(mkey,1,IPC_CREAT|0666);
-    if(mainSem == -1) {
-        printf("semget error\n");
-        exit(EXIT_FAILURE);
-    }
-
-    /* Initializes semaphore for threads */
-    sem = semget(key,5,IPC_CREAT|0666);
-    if(sem == -1) {
-        printf("semget error\n");
-        exit(EXIT_FAILURE);
-    }
-
     PlantSeeds(SEED);
 
     /* Create files for statistics */
@@ -118,6 +51,8 @@ int main() {
 
     fp = fopen(FILENAME_WAIT_GLOBAL, "a");
 
+    system("clear");
+    
     rep = 1;
     while (rep <= REP) {
 
@@ -125,35 +60,26 @@ int main() {
         currentSamplingInterval = SAMPLING;
 
         //printf("\nSIMULATION REP: %d | SAMPLING: %6.2f\n", rep, currentSamplingInterval);
+        printf("\n| ----------------------------------------------------------------------------------------- |\n");
         printf("\nSIMULATION REP: %d\n", rep);
 
         /* Init global_info structure */
         init_global_info_structure();
-
-        semctl(mainSem, 0, SETVAL, 0);
-        for (int i=0; i<5; i++)
-            semctl(sem, i, SETVAL, 0);
 
         totExtArrivals = 0;
         exited = 0;
         endSimulation = 0;
         changeConfig = 0;
         
+        block4Lost = 0;
+        block4ToExit = 0;
+
         glblWait = 0.0;
         glblWaitBlockOne = 0.0;
         glblWaitBlockTwo = 0.0;
         glblWaitBlockThree = 0.0;
         glblWaitBlockFour = 0.0;
         glblWaitBlockFive = 0.0;    
-
-        /* Creation of threads */
-        create_threads();
-
-        /* Waiting for threads creation */
-        oper.sem_num = 0;
-        oper.sem_op = -5;
-        oper.sem_flg = 0;
-        semop(mainSem,&oper,1);
 
         /* Set first external arrival and departure info */
         arrival = START;
@@ -202,47 +128,32 @@ int main() {
 
                 case 1:
                     /* Unlock block 1 */
-                    oper.sem_num = 0;
-                    oper.sem_op = 1;
-                    oper.sem_flg = 0;
-                    semop(sem,&oper,1);
+                    block1();
                     break;
 
                 case 2:
                     /* Unlock block 2 */
-                    oper.sem_num = 1;
-                    oper.sem_op = 1;
-                    oper.sem_flg = 0;
-                    semop(sem,&oper,1);
+                    block2();
                     break;
 
                 case 3:
                     /* Unlock block 3 */
-                    oper.sem_num = 2;
-                    oper.sem_op = 1;
-                    oper.sem_flg = 0;
-                    semop(sem,&oper,1);
+                    block3();
                     break;
 
                 case 4:
                     /* Unlock block 4 */
-                    oper.sem_num = 3;
-                    oper.sem_op = 1;
-                    oper.sem_flg = 0;
-                    semop(sem,&oper,1);
+                    block4();
                     break;
 
                 case 5:
                     /* Unlock block 5 */
-                    oper.sem_num = 4;
-                    oper.sem_op = 1;
-                    oper.sem_flg = 0;
-                    semop(sem,&oper,1);
+                    block5();
                     break;
 
                 case 6:
                     /* Event update statistics */
-                    // Senza sbloccare i thread l'orchestrator si troverà i valori dei tempi di risposta globali aggiornati agli ultimi istanti
+                    // Senza attivare i blocchi l'orchestrator si troverà i valori dei tempi di risposta globali aggiornati agli ultimi istanti
                     // Si calcola il tempo globale e lo scrive su file
                     //printf("\n  -> CURRENT SAMPLING: %6.2f\n", currentSamplingInterval);
                     glblWait = glblWaitBlockOne + glblWaitBlockTwo + glblWaitBlockThree + glblWaitBlockFour + glblWaitBlockFive;
@@ -278,7 +189,7 @@ int main() {
                     //fp = fopen(FILENAME_WAIT_GLOBAL, "a");
                     fprintf(fp,"%6.6f\n", glblWait);
                     //fclose(fp);
-                    // Dopodichè aggiorna il tempo di campionamento successivo e, se maggiore di stop, porre l'evento successivo ad infinito
+                    // Dopodichè aggiorna il tempo di campionamento successivo e, se maggiore di stop, porre l'evento di campionamento successivo ad infinito
                     counter++;
                     currentSamplingInterval = SAMPLING*counter;
                     if (currentSamplingInterval > STOP) 
@@ -291,19 +202,12 @@ int main() {
                     /* Event change time slot */
                     changeConfig = 1;
 
-                    /* Sblocco tutti i thread in ordine in modo che cambino configurazione dei server */
-                    for (int i=0; i<5; i++) {  // ***************** reimpostare a 5 *************************
-                        oper.sem_num = i;
-                        oper.sem_op = 1;
-                        oper.sem_flg = 0;
-                        semop(sem, &oper, 1);
-                    }
-
-                    /* Waiting for threads change configuration */
-                    oper.sem_num = 0;
-                    oper.sem_op = -5;  // ***************** reimpostare a 5 *************************
-                    oper.sem_flg = 0;
-                    semop(mainSem,&oper,1);
+                    /* Sblocco tutti i blocchi in ordine in modo che cambino configurazione dei server */
+                    block1();
+                    block2();
+                    block3();
+                    block4();
+                    block5();
 
                     update_next_event(7, INFINITY, -1);
                     changeConfig = 2;
@@ -320,15 +224,9 @@ int main() {
                     continue;
             }
 
-            /* Waiting for thread operation */
-            oper.sem_num = 0;
-            oper.sem_op = -1;
-            oper.sem_flg = 0;
-            semop(mainSem, &oper, 1);
-
             /* Se il blocco che ha appena terminato ha processato
             * una partenza, questa deve essere posta come arrivo per il blocco
-            * successivo. Ogni thread deve quindi 'restituire' qualcosa al
+            * successivo. Ogni blocco deve quindi 'restituire' qualcosa al
             * orchestrator in modo tale che esso sappia se deve inserire un nuovo
             * arrivo nella lista di un blocco */
             if (departureInfo.time != -1) {  /* vuol dire che c'è stata una partenza dal blocco che ha appena terminato quindi un arrivo nel blocco successivo */
@@ -369,18 +267,9 @@ int main() {
                 departureInfo.time = -1; /* In any case resets departure info to -1 */
 
                 if ((totExtArrivals == exited) && (get_next_event_time(0) == INFINITY)) { /* If all the jobs have been processed, the simulation ends */
-                    //printf("\n[ORCHESTRATOR]: All the jobs have been processed, the simulation ends, the orchestrator unlocks and wait all the threads\n");
-                    //printf("\n\n[ORCHESTRATOR]: totExtArrivals: %d | exited: %d \n", totExtArrivals, exited);
+                    printf("\n[ORCHESTRATOR]: All the jobs have been processed, the simulation ends, the orchestrator unlocks and wait all the blocks\n");
+                    printf("[ORCHESTRATOR]: totExtArrivals: %d | exited: %d \n", totExtArrivals, exited);
                     goto nextRep;
-                    /*
-                    endSimulation = 1;
-                    printf("Unlock threads\n");
-                    unlock_waiting_threads();
-                    oper.sem_num = 0;
-                    oper.sem_op = -5;
-                    oper.sem_flg = 0;
-                    semop(mainSem, &oper, 1);
-                    */
                 }
             }
         }
@@ -388,18 +277,17 @@ int main() {
     nextRep:
         endSimulation = 1;
         //printf("[ORCHESTRATOR]: After nextRep unlock threads and take statistics\n");
-        /* Sblocco tutti i thread in ordine in modo che terminino */
-        for (int i=0; i<5; i++) {
-            oper.sem_num = i;
-            oper.sem_op = 1;
-            oper.sem_flg = 0;
-            semop(sem, &oper, 1);
-            pthread_join(tid[i], NULL);
-            //printf("  BLOCK %d JOINED\n", i+1);
-        }
+
+        block1();
+        block2();
+        block3();
+        block4();
+        block5();
 
         printf("  -> SUCCESS\n");
         
+        printf("\n| ----------------------------------------------------------------------------------------- |\n");
+
         rep++;  
     }
 

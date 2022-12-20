@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "rngs.h"
 
-#define REP 256
+#define REP 5
 #define SEED 123456789
 #define START 0.0       /* initial (open the door)                                          */
 #define CHANGE 36000.0
@@ -56,9 +56,6 @@ typedef struct block_queue {
 extern global_info globalInfo[8];
 extern departure_info departureInfo;
 
-extern int sem;
-extern int mainSem;
-
 extern int block4Lost;
 extern int block4ToExit;
 
@@ -83,6 +80,5 @@ int get_next_event_type(int blockNum);
 double get_next_event_time(int blockNum);
 void update_next_event(int blockNum, double time, int eventType);
 double get_probability();
-int unlock_waiting_threads();
 
 #endif 

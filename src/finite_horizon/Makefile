@@ -6,9 +6,9 @@
 
 CC = gcc
 CFLAGS = -g -Wall
-LDFLAGS = -lm -lpthread
+LDFLAGS = -lm
 
-OBJFILES = block1 block2 block3 block4 block5 simu rgns.o simul batch finite
+OBJFILES = block1 block2 block3 block4 block5 rgns.o finite
 
 all: $(OBJFILES)
 
