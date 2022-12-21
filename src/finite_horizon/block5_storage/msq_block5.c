@@ -130,22 +130,6 @@ void change_servers_status_five(event_list_five event, int servers)
 }
 
 static void init_block() {
-    /* Initialize arrival event */
-    t.current = START;
-
-    /* Initialize server status */
-    for (s = 0; s < MAX_SERVERS; s++)
-    {
-        event[s].t = START; /* this value is arbitrary because */
-        event[s].x = 0;     /* all servers are initially idle  */
-        if (s < numberOfServers)
-            event[s].status = 1; /* server up */
-        else
-            event[s].status = 0; /* server down */
-        sum[s].service = 0.0;
-        sum[s].served = 0;
-    }
-
     numberOfServers = SERVERS_FIVE_F1; /* current number of servers */
     newAvailableServers = 0;
     totalArr = 0;
@@ -161,6 +145,23 @@ static void init_block() {
     totalService = 0.0;
     avgService = 0.0;
     totalUtilization = 0.0;
+
+    
+    /* Initialize arrival event */
+    t.current = START;
+
+    /* Initialize server status */
+    for (s = 0; s < MAX_SERVERS; s++)
+    {
+        event[s].t = START; /* this value is arbitrary because */
+        event[s].x = 0;     /* all servers are initially idle  */
+        if (s < numberOfServers)
+            event[s].status = 1; /* server up */
+        else
+            event[s].status = 0; /* server down */
+        sum[s].service = 0.0;
+        sum[s].served = 0;
+    }
 
     init = 0;
 }
@@ -214,7 +215,9 @@ static void process_departure() {
 }
 
 static void print_statistics() {
-    //FILE *fp;
+    
+    FILE *fp;
+    
     printf("\nBLOCK 5 STATISTICS");
     
     printf("\nlast arrival: %6.2f\n", lastArrival);
@@ -226,28 +229,23 @@ static void print_statistics() {
     printf("\n\n[BLOCCO5]: Processed jobs %ld, arrivals %ld\n", processedJobs, totalArr);
 
     /* Write statistics on file */
-    /*
     fp = fopen(FILENAME_WAIT_BLOCK5, "a");
-    fprintf(fp,"%6.6f\n", area / index);
+    fprintf(fp,"%6.6f\n", area / processedJobs);
     fclose(fp);
-    */
 
     for (s = 0; s < MAX_SERVERS; s++)     /* adjust area to calculate */
         area -= sum[s].service;            /* averages for the queue */   
 
-    /*
-    printf("  avg delay .......... = %6.2f\n", area / index);
+    printf("  avg delay .......... = %6.2f\n", area / processedJobs);
     printf("  avg # in queue ..... = %6.2f\n", area / t.current);
     printf("\nthe server statistics are:\n\n");
     printf("    server     utilization     avg service        share\n");
-    */
 
     for (s = 0; s < MAX_SERVERS; s++) {
-        /*
         printf("%8d %14.3f %15.2f %15.3f\n", s, sum[s].service / t.current,
                sum[s].service / sum[s].served,
-               (double) sum[s].served / index);
-               */
+               (double) sum[s].served / processedJobs);
+               
         totalService += sum[s].service / sum[s].served;
         totalUtilization += sum[s].service / t.current;
     }
@@ -260,11 +258,9 @@ static void print_statistics() {
     */
 
     /* Write statistics on file */
-    /*
     fp = fopen(FILENAME_DELAY_BLOCK5, "a");
-    fprintf(fp,"%6.6f\n", area / index);
+    fprintf(fp,"%6.6f\n", area / processedJobs);
     fclose(fp);
-    */
 
     // printf("\n");
 }

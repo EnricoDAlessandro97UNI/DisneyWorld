@@ -9,7 +9,7 @@
 #include <math.h>
 #include "../finite_helper.h"
 
-#define M2 12
+#define M2 20
 
 
 /***************************** GLOBAL VARIABLES *************************************/
@@ -92,7 +92,7 @@ static void process_departure() {
 
 static void print_statistics() {
 
-    //FILE *fp;
+    FILE *fp;
 
     printf("\nBLOCK 2 STATISTICS");
     
@@ -106,7 +106,6 @@ static void print_statistics() {
     printf("   utilization ............. = %6.2f\n", area.service / t.current);
     
     /* Write statistics on files */
-    /*
     fp = fopen(FILENAME_WAIT_BLOCK2, "a");
     fprintf(fp,"%6.6f\n", area.node / processedJobs);
     fclose(fp);
@@ -114,7 +113,6 @@ static void print_statistics() {
     fp = fopen(FILENAME_DELAY_BLOCK2, "a");
     fprintf(fp,"%6.6f\n", area.queue / processedJobs);
     fclose(fp);
-    */
 }
 
 void block2() {

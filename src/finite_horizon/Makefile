@@ -5,7 +5,7 @@
 #
 
 CC = gcc
-CFLAGS = -g -Wall
+CFLAGS = -g -Wall -Wextra
 LDFLAGS = -lm
 
 OBJFILES = block1 block2 block3 block4 block5 rgns.o finite

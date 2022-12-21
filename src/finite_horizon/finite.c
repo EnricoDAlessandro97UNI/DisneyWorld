@@ -27,7 +27,7 @@ double glblWaitBlockThree;
 double glblWaitBlockFour;
 double glblWaitBlockFive;
 
-int updateStatistics;
+int updateStatistics;  /* da rimuovere */
 /* ----------------------------------------------- */
 
 int main() {

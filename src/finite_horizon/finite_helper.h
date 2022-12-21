@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "rngs.h"
 
-#define REP 5
+#define REP 256
 #define SEED 123456789
 #define START 0.0       /* initial (open the door)                                          */
 #define CHANGE 36000.0
