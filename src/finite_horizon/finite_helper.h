@@ -10,8 +10,8 @@
 #define CHANGE 36000.0
 #define SAMPLING 100.0
 #define STOP 57600.0    /* terminal (close the door) time  (Fascia1: 36000, Fascia2: 21600) */
-#define INT1 2.4        /* interrarivi (1/lambda1)                                          */
-#define INT2 4.32       /* interrarivi (1/lambda2)                                          */
+#define INT1 2.4        /* interarrivals (1/lambda1)                                          */
+#define INT2 4.32       /* interarrivals (1/lambda2)                                          */
 
 #define MAX_SERVERS 100
 
@@ -44,13 +44,6 @@ typedef struct departure_info {
     int blockNum;   /* Block from which there was a departure */
     double time;    /* Departure time */
 } departure_info;
-
-/* stuttura utilizzata dai blocchi per ritornare una partenza */
-typedef struct block_queue {
-    int block;
-    double time;
-    struct block_queue *next;
-} block_queue;
 
 /* -------------- GLOBAL VARIABLES -------------- */
 extern global_info globalInfo[8];

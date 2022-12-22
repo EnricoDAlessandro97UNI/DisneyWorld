@@ -55,7 +55,7 @@ void init_global_info_structure() {
     globalInfo[0].time = 0;         /* The first block must have the most immininent event */
     globalInfo[0].eventType = 0;    /* At the beginning all the blocks await an arrival */
 
-    globalInfo[6].time = SAMPLING;  /* Event update statistics */
+    globalInfo[6].time = SAMPLING;  /* Event update stats */
     globalInfo[6].eventType = -1;   
 
     globalInfo[7].time = CHANGE;    /* Event change time slot */

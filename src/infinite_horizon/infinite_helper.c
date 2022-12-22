@@ -55,9 +55,6 @@ void init_global_info_structure() {
     globalInfo[0].time = 0;         /* The first block must have the most immininent event */
     globalInfo[0].eventType = 0;    /* At the beginning all the blocks await an arrival */
 
-    globalInfo[6].time = B;  /* Event update statistics */
-    globalInfo[6].eventType = -1;   
-
     /* Initializes other blocks */
     for (int i=1; i<=5; i++) {
         globalInfo[i].time = INFINITY;  /* The other blocks have an infinite time  */
@@ -69,7 +66,7 @@ void init_global_info_structure() {
 int get_next_event() {
     int blockNumber = 0;
     double min = globalInfo[0].time;
-    for (int i=0; i<7; i++) {
+    for (int i=0; i<6; i++) {
         if (globalInfo[i].time < min) {
             blockNumber = i;
             min = globalInfo[i].time;
@@ -78,10 +75,7 @@ int get_next_event() {
 
     if (min == INFINITY)
         return -1;
-    else if (globalInfo[6].time <= min) /* Sampling */
-        return 6;
-    else
-        return blockNumber;
+    return blockNumber;
 }
 
 int get_next_event_type(int blockNum) {

@@ -4,22 +4,19 @@
 #include <stdio.h>
 #include "rngs.h"
 
-#define REP 256     /* number of repetitions for each interval */
-#define K 64        /* number of batches */
-#define B 512       /* sampling interval */
-#define N 32768   /* number of jobs to process (N=K*B) */
+#define REP 3     /* number of repetitions for each interval */
+#define K 128       /* number of batches */
+#define B 1024      /* sampling interval */
+#define N 131072    /* number of jobs to process (N=K*B) */
 
 #define SEED 123456789
-#define START 0.0       /* initial (open the door)                                          */
+#define START 0.0       /* initial (open the door) */
 
 #ifndef F
 #define INT 2.4     /* interarrivals (1/lambda1) */
 #else
 #define INT 4.32    /* interarrivals (1/lambda2) */
-#endif
-
-//#define INT 2.4         
-//#define INT 4.32        
+#endif   
 
 #define ONLINE_PROBABILITY 0.6
 #define DISABLED_PROBABILITY 0.2
@@ -51,15 +48,8 @@ typedef struct departure_info {
     double time;    /* Departure time */
 } departure_info;
 
-/* stuttura utilizzata dai blocchi per ritornare una partenza */
-typedef struct block_queue {
-    int block;
-    double time;
-    struct block_queue *next;
-} block_queue;
-
 /* -------------- GLOBAL VARIABLES -------------- */
-extern global_info globalInfo[7];
+extern global_info globalInfo[6];
 extern departure_info departureInfo;
 
 extern int block4Lost;

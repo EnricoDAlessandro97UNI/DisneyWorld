@@ -1,15 +1,24 @@
 /* ------------------------------------------------------------------------- 
- * Name            : ssq_block2.c  (Single Server Queue)
- * Author          : Enrico D'Alessandro & Alessandro De Angelis
+ * This program is a next-event simulation of a single-server FIFO service
+ * node using Exponentially distributed interarrival times and Erlang 
+ * distributed service times (i.e., a M/E/1 queue).  The service node is 
+ * assumed to be initially idle, no arrivals are permitted after the 
+ * terminal time STOP, and the node is then purged by processing any 
+ * remaining jobs in the service node.
+ *
+ * Name            : ssq4.c  (Single Server Queue, version 4)
+ * Author          : Steve Park & Dave Geyer
  * Language        : ANSI C
+ * Latest Revision : 11-09-98
  * ------------------------------------------------------------------------- 
  */
 
 #include <stdio.h>
 #include <math.h>
-#include "../finite_helper.h"
+#include <sys/sem.h>
+#include "../infinite_helper.h"
 
-#define M2 20
+#define M2 12
 
 
 /***************************** GLOBAL VARIABLES *************************************/
@@ -39,43 +48,22 @@ static int nextEvent;        /* Next event type */
 static double depTime = 0;
 /************************************************************************************/
 
+
 double get_service_block_two() {
     SelectStream(2);
     return (Exponential(M2));
 }
 
-static void init_block() {
-    t.current = START;              /* set the clock                         */
-    t.arrival = INFINITY;           /* schedule the first arrival            */
-    t.completion = INFINITY;        /* the first event can't be a completion */
-
-    area.node = 0.0;
-    area.queue = 0.0;
-    area.service = 0.0;
-
-    processedJobs = 0;                  /* used to count departed jobs         */
-    number = 0;                  /* number in the node                  */
-
-    lastArrival = 0.0;
-
-    depTime = 0;
-
-    init = 0;
-}
-
 static void process_arrival() {
     number++;
-
     t.arrival = t.current;
     lastArrival = t.arrival;
-
     if (number == 1)
         t.completion = t.current + get_service_block_two();
 }
 
 static void process_departure() {
     depTime = t.current;
-
     processedJobs++;
     number--;
     if (number > 0) {
@@ -84,18 +72,16 @@ static void process_departure() {
     else {
         t.completion = INFINITY;
     }
-
     /* Return departure to the orchestrator */
     departureInfo.blockNum = 2;
     departureInfo.time = depTime;
 }
 
 static void print_statistics() {
+    //FILE *fp;
 
-    FILE *fp;
+    printf("\nBLOCK 2 STATISTICS:");
 
-    printf("\nBLOCK 2 STATISTICS");
-    
     printf("\nfor %ld jobs\n", processedJobs);
     printf("   average interarrival time = %6.2f\n", lastArrival / processedJobs);
     printf("   average wait ............ = %6.2f\n", area.node / processedJobs);
@@ -104,36 +90,46 @@ static void print_statistics() {
     printf("   average # in the node ... = %6.2f\n", area.node / t.current);
     printf("   average # in the queue .. = %6.2f\n", area.queue / t.current);
     printf("   utilization ............. = %6.2f\n", area.service / t.current);
-    
-    /* Write statistics on files */
-    fp = fopen(FILENAME_WAIT_BLOCK2, "a");
-    fprintf(fp,"%6.6f\n", area.node / processedJobs);
-    fclose(fp);
 
-    fp = fopen(FILENAME_DELAY_BLOCK2, "a");
-    fprintf(fp,"%6.6f\n", area.queue / processedJobs);
-    fclose(fp);
+    /* Write statistics on files */
+    // fp = fopen(FILENAME_WAIT_BLOCK2, "a");
+    // fprintf(fp,"%6.6f\n", area.node / processedJobs);
+    // fclose(fp);
+
+    // fp = fopen(FILENAME_DELAY_BLOCK2, "a");
+    // fprintf(fp,"%6.6f\n", area.queue / processedJobs);
+    // fclose(fp);
 }
 
 void block2() {
 
     /* Check if initialization of structures is needed */
     if (init == 1) {
-        init_block();
+        
+        t.current = START;              /* set the clock                         */
+        t.arrival = INFINITY;           /* schedule the first arrival            */
+        t.completion = INFINITY;        /* the first event can't be a completion */
+
+        init = 0;
     }
-    
+
     /* Check for the end of the simulation */
-    if (endSimulation == 1) 
-    {
+    if (endSimulation == 1) {
         update_next_event(2, INFINITY, -1);
         print_statistics();
-        init = 1;
+        init = 1; /* re-enable initialization */
+        
+        area.node = 0.0;
+        area.queue = 0.0;
+        area.service = 0.0;
 
-        return;
-    }
+        processedJobs = 0;           /* used to count departed jobs         */
+        number = 0;                  /* number in the node                  */
 
-    /* Check for server configuration changes */
-    if (changeConfig == 1) {
+        lastArrival = 0.0;
+
+        depTime = 0;
+
         return;
     }
 
@@ -149,8 +145,8 @@ void block2() {
     }
     t.current = t.next; /* advance the clock */
 
-    /* For global wait statistics */
-    if (processedJobs == 0) /* Statistics not yet ready */
+    /* For global wait stats */
+    if (processedJobs == 0) /* stats not yet ready */
         glblWaitBlockTwo = 0.0;
     else 
         glblWaitBlockTwo = area.node / processedJobs;
@@ -165,5 +161,4 @@ void block2() {
     }
 
     update_next_event(2, t.completion, 1);
-
 }

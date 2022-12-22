@@ -12,7 +12,7 @@
 #include "block5_storage/block5_helper.h"
 
 /* ----------- GLOBAL EXTERN VARIABLES ----------- */
-global_info globalInfo[8];
+global_info globalInfo[6];
 departure_info departureInfo;
 
 int endSimulation;
@@ -38,7 +38,7 @@ int main() {
     int totExtArrivals = 0;
     int exited = 0;
     int counter = 1;
-    int currentSamplingInterval = 1;
+    int currentSamplingInterval = B;
     double glblWait = 0.0;
 
     PlantSeeds(SEED);
@@ -50,21 +50,19 @@ int main() {
 
     system("clear");
     
-    rep = 1;
-
     /* La simulazione finirà quando il numero di job processati sarà esattamente uguale a quelli previsti */
     /* Devo mettere un evento ogni volta che vengono processati B jobs */
     /* La simulazione per quei B jobs deve essere ripetuta per REP volte 256 */
-    while (exited < N) { /* exited < N*/
-        counter = 1;
-        currentSamplingInterval = 1;
+    //while (exited < N) { /* exited < N*/
 
-        printf("\n| ----------------------------------------------------------------------------------------- |\n");
-        printf("\nSIMULATION REP: %d | SAMPLING: %d\n", rep, currentSamplingInterval);
-        //printf("\nSIMULATION REP: %d\n", rep);
+    rep = 1;
+    while (rep <= REP) {
 
         /* Init global_info structure */
         init_global_info_structure();
+
+        counter = 1;
+        currentSamplingInterval = B;
 
         totExtArrivals = 0;
         exited = 0;
@@ -85,6 +83,9 @@ int main() {
         arrival = get_external_arrival(arrival, INT);
         update_next_event(0, arrival, 0);
         departureInfo.time = -1;
+
+        printf("\n| ----------------------------------------------------------------------------------------- |\n");
+        printf("\nSIMULATION REP: %d | INITIAL_SAMPLING: %d\n", rep, currentSamplingInterval);
 
         while (1) {
             
@@ -113,7 +114,12 @@ int main() {
 
                     /* Generate the next external arrival instant */
                     arrival = get_external_arrival(arrival, INT);
-                    update_next_event(0, arrival, 0);
+                    if (totExtArrivals == N) { /* No more external arrivals */
+                        update_next_event(0, INFINITY, -1);
+                    }   
+                    else {
+                        update_next_event(0, arrival, 0);
+                    }
 
                     continue;
 
@@ -137,31 +143,9 @@ int main() {
                     block5();
                     break;
 
-                case 6: /* Event update statistics */
-                    // Senza attivare i blocchi l'orchestrator si troverà i valori dei tempi di risposta globali aggiornati agli ultimi istanti
-                    // Si calcola il tempo globale e lo scrive su file
-                    //printf("\n  -> CURRENT SAMPLING: %6.2f\n", currentSamplingInterval);
-                    glblWait = glblWaitBlockOne + glblWaitBlockTwo + glblWaitBlockThree + glblWaitBlockFour + glblWaitBlockFive;
-
-                    /* Write statistics on file */
-                    //fp = fopen(FILENAME_WAIT_GLOBAL, "a");
-                    fprintf(fp,"%6.6f\n", glblWait);
-                    //fclose(fp);
-                    // Dopodichè aggiorna il tempo di campionamento successivo e, se maggiore di stop, porre l'evento di campionamento successivo ad infinito
-                    
-                    /* Updates the next sampling instant */
-                    counter++;
-                    currentSamplingInterval = B*counter;
-                    if (currentSamplingInterval == N) 
-                        update_next_event(6, INFINITY, -1);
-                    else 
-                        update_next_event(6, currentSamplingInterval, -1);
-                    continue;
-
-                case -1:
-                    /* Execution finished */
+                case -1: /* Execution finished */
                     printf("\n\n[ORCHESTRATOR]: All the blocks have finished! \n");
-                    goto end;
+                    goto nextRep;
                     break;
 
                 default:
@@ -210,28 +194,40 @@ int main() {
 
                 departureInfo.time = -1; /* In any case resets departure info to -1 */
 
+                /* Check if stats update is needed */
+                if (exited == currentSamplingInterval) {
+                    printf("\n  -> CURRENT SAMPLING: %d\n", currentSamplingInterval);
+                    glblWait = glblWaitBlockOne + glblWaitBlockTwo + glblWaitBlockThree + glblWaitBlockFour + glblWaitBlockFive;
+
+                    /* Write stats on file */
+                    fprintf(fp,"%6.6f\n", glblWait);
+                    
+                    /* update next sampling */
+                    counter++;
+                    currentSamplingInterval = B*counter;
+                }
+
                 /* if the number of processed jobs is equal to the jobs exited the system 
                    and if there are no more arrivals from outside the simulation ends */
                 if ((totExtArrivals == exited) && (get_next_event_time(0) == INFINITY)) { /* If all the jobs have been processed, the simulation ends */
                     printf("\n[ORCHESTRATOR]: All the jobs have been processed, the simulation ends, the orchestrator unlocks and wait all the blocks\n");
                     printf("[ORCHESTRATOR]: totExtArrivals: %d | exited: %d \n", totExtArrivals, exited);
-                    goto nextRep;
+                    
+                    endSimulation = 1;
+                    block1();
+                    block2();
+                    block3();
+                    block4();
+                    block5();   
+
+                    for (int i=0; i<=5; i++)
+                        printf("\n   Block %d: %6.2f | %d", i, globalInfo[i].time, globalInfo[i].eventType);
+
                 }
             }
         }
 
-        printf("\n[ORCHESTRATOR]: All the jobs have been processed, the simulation ends, the orchestrator unlocks and wait all the blocks\n");
-        printf("[ORCHESTRATOR]: totExtArrivals: %d | exited: %d \n", totExtArrivals, exited);
-
-    end:
-
-        endSimulation = 1;
-
-        block1();
-        block2();
-        block3();
-        block4();
-        block5();
+    nextRep:       
 
         printf("  -> SUCCESS\n");
         

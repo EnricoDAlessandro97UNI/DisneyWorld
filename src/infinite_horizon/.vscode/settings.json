@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "types.h": "c"
+        "types.h": "c",
+        "infinite_helper.h": "c",
+        "stdio.h": "c"
     }
 }

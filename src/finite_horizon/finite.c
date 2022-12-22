@@ -26,8 +26,6 @@ double glblWaitBlockTwo;
 double glblWaitBlockThree;
 double glblWaitBlockFour;
 double glblWaitBlockFive;
-
-int updateStatistics;  /* da rimuovere */
 /* ----------------------------------------------- */
 
 int main() {
@@ -112,13 +110,13 @@ int main() {
                         }
                     }
 
-                    /* Genera il prossimo istante di arrivo ed aggiorna la globalInfo[0] */
+                    /* Generate the next external arrival instant */
                     if (changeConfig == 2)
                         arrival = get_external_arrival(arrival, INT2);
                     else
                         arrival = get_external_arrival(arrival, INT1);
 
-                    if (arrival > STOP) {
+                    if (arrival > STOP) { /* No more external arrivals */
                         update_next_event(0, INFINITY, -1);
                     }   
                     else {
@@ -126,70 +124,35 @@ int main() {
                     }
                     continue;
 
-                case 1:
-                    /* Unlock block 1 */
+                case 1: /* Block 1 */
                     block1();
                     break;
 
-                case 2:
-                    /* Unlock block 2 */
+                case 2: /* Block 2 */
                     block2();
                     break;
 
-                case 3:
-                    /* Unlock block 3 */
+                case 3: /* Block 3 */
                     block3();
                     break;
 
-                case 4:
-                    /* Unlock block 4 */
+                case 4: /* Block 4 */
                     block4();
                     break;
 
-                case 5:
-                    /* Unlock block 5 */
+                case 5: /* Block 5 */
                     block5();
                     break;
 
-                case 6:
-                    /* Event update statistics */
-                    // Senza attivare i blocchi l'orchestrator si troverà i valori dei tempi di risposta globali aggiornati agli ultimi istanti
-                    // Si calcola il tempo globale e lo scrive su file
+                case 6: /* Event update stats */
                     //printf("\n  -> CURRENT SAMPLING: %6.2f\n", currentSamplingInterval);
                     glblWait = glblWaitBlockOne + glblWaitBlockTwo + glblWaitBlockThree + glblWaitBlockFour + glblWaitBlockFive;
 
-                    /* Fare un IF per controllare chi è il figlio di puttana che è rimasto ad infinito */
-                    //printf("    glblWaitBlockOne: %6.2f\n", glblWaitBlockOne);
-                    if (glblWaitBlockOne == INFINITY) {
-                        printf("\nBLOCCO 1\n");
-                        exit(EXIT_FAILURE);
-                    }
-                    //printf("    glblWaitBlockTwo: %6.2f\n", glblWaitBlockTwo);
-                    if (glblWaitBlockTwo == INFINITY) {
-                        printf("\nBLOCCO 2\n");
-                        exit(EXIT_FAILURE);
-                    }
-                    //printf("    glblWaitBlockThree: %6.2f\n", glblWaitBlockThree);
-                    if (glblWaitBlockThree == INFINITY) {
-                        printf("\nBLOCCO 3\n");
-                        exit(EXIT_FAILURE);
-                    }
-                    //printf("    glblWaitBlockFour: %6.2f\n", glblWaitBlockFour);
-                    if (glblWaitBlockFour == INFINITY) {
-                        printf("\nBLOCCO 4\n");
-                        exit(EXIT_FAILURE);
-                    }
-                    //printf("    glblWaitBlockFive: %6.2f\n", glblWaitBlockFive);
-                    if (glblWaitBlockFive == INFINITY) {
-                        printf("\nBLOCCO 5\n");
-                        exit(EXIT_FAILURE);
-                    }
-
-                    /* Write statistics on file */
+                    /* Write stats on file */
                     //fp = fopen(FILENAME_WAIT_GLOBAL, "a");
                     fprintf(fp,"%6.6f\n", glblWait);
                     //fclose(fp);
-                    // Dopodichè aggiorna il tempo di campionamento successivo e, se maggiore di stop, porre l'evento di campionamento successivo ad infinito
+
                     counter++;
                     currentSamplingInterval = SAMPLING*counter;
                     if (currentSamplingInterval > STOP) 
