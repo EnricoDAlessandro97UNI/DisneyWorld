@@ -4,16 +4,22 @@
 #include <stdio.h>
 #include "rngs.h"
 
-#define REP 256
+#define REP 256     /* number of repetitions for each interval */
+#define K 64        /* number of batches */
+#define B 512       /* sampling interval */
+#define N 32768   /* number of jobs to process (N=K*B) */
+
 #define SEED 123456789
 #define START 0.0       /* initial (open the door)                                          */
-#define CHANGE 36000.0
-#define SAMPLING 100.0
-#define STOP 57600.0    /* terminal (close the door) time  (Fascia1: 36000, Fascia2: 21600) */
-#define INT1 2.4        /* interrarivi (1/lambda1)                                          */
-#define INT2 4.32       /* interrarivi (1/lambda2)                                          */
 
-#define MAX_SERVERS 100
+#ifndef F
+#define INT 2.4     /* interarrivals (1/lambda1) */
+#else
+#define INT 4.32    /* interarrivals (1/lambda2) */
+#endif
+
+//#define INT 2.4         
+//#define INT 4.32        
 
 #define ONLINE_PROBABILITY 0.6
 #define DISABLED_PROBABILITY 0.2
@@ -53,17 +59,13 @@ typedef struct block_queue {
 } block_queue;
 
 /* -------------- GLOBAL VARIABLES -------------- */
-extern global_info globalInfo[8];
+extern global_info globalInfo[7];
 extern departure_info departureInfo;
-
-extern int sem;
-extern int mainSem;
 
 extern int block4Lost;
 extern int block4ToExit;
 
 extern int endSimulation;
-extern int changeConfig;
 
 extern double glblWaitBlockOne;
 extern double glblWaitBlockTwo;
@@ -83,6 +85,5 @@ int get_next_event_type(int blockNum);
 double get_next_event_time(int blockNum);
 void update_next_event(int blockNum, double time, int eventType);
 double get_probability();
-int unlock_waiting_threads();
 
 #endif 

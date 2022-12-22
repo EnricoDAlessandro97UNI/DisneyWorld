@@ -2,7 +2,7 @@
 from statistics import mean
 import sys
 
-REP = 5           # number of simulation repetitions
+REP = 256           # number of simulation repetitions
 STOP = 57600.0      # maximum simulation time
 SAMPLING = 100.0    # sampling interval
 
@@ -19,7 +19,7 @@ def calculateMean(content):
     for i in range(interval):
         index = i
         inputList.clear()
-        for j in range(REP):
+        for _ in range(REP):
             inputList.append(float(content[index]))
             index += interval
         listAvg.append(mean(inputList))

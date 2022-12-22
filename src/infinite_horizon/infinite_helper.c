@@ -4,8 +4,6 @@
  */
 #include <math.h>
 #include <stdlib.h>
-#include <sys/sem.h>
-#include <pthread.h>
 #include "rngs.h"
 #include "infinite_helper.h"
 
@@ -53,15 +51,12 @@ void create_statistics_files() {
 
 /* Initializes the initial state of the global_info structure  */
 void init_global_info_structure() {
-    /* Initializes first block */
+    /* Initializes first block used for external arrivals */
     globalInfo[0].time = 0;         /* The first block must have the most immininent event */
     globalInfo[0].eventType = 0;    /* At the beginning all the blocks await an arrival */
 
-    globalInfo[6].time = SAMPLING;  /* Event update statistics */
+    globalInfo[6].time = B;  /* Event update statistics */
     globalInfo[6].eventType = -1;   
-
-    globalInfo[7].time = CHANGE;    /* Event change time slot */
-    globalInfo[7].eventType = -1;
 
     /* Initializes other blocks */
     for (int i=1; i<=5; i++) {
@@ -74,7 +69,7 @@ void init_global_info_structure() {
 int get_next_event() {
     int blockNumber = 0;
     double min = globalInfo[0].time;
-    for (int i=0; i<=7; i++) {
+    for (int i=0; i<7; i++) {
         if (globalInfo[i].time < min) {
             blockNumber = i;
             min = globalInfo[i].time;
@@ -83,10 +78,8 @@ int get_next_event() {
 
     if (min == INFINITY)
         return -1;
-    else if (globalInfo[6].time <= min)
+    else if (globalInfo[6].time <= min) /* Sampling */
         return 6;
-    else if (globalInfo[7].time <= min)
-        return 7;
     else
         return blockNumber;
 }
@@ -107,19 +100,4 @@ void update_next_event(int blockNum, double time, int eventType) {
 double get_probability() {
     SelectStream(6);
     return Uniform(0.0, 1.0);
-}
-
-int unlock_waiting_threads() {
-
-    struct sembuf oper;
-    
-    /* sblocco tutti i thread in ordine in modo che terminino */
-    for (int i=0; i<5; i++) {
-        oper.sem_num = i;
-        oper.sem_op = 1;
-        oper.sem_flg = 0;
-        semop(sem, &oper, 1);
-    }
-    
-    return 0;
 }
