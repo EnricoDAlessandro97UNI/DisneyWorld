@@ -34,6 +34,7 @@ int main() {
     int rep = 1;
 	int blockNumber;
     double arrival = START;
+    int onlineTickets;
     double prob;
     int totExtArrivals = 0;
     int exited = 0;
@@ -65,6 +66,7 @@ int main() {
         currentSamplingInterval = B;
 
         totExtArrivals = 0;
+        onlineTickets = 0;
         exited = 0;
         endSimulation = 0;
         
@@ -102,6 +104,7 @@ int main() {
                         update_next_event(1, arrival, 0);
                     } 
                     else { /* online arrival */
+                        onlineTickets++;
                         if (get_probability() <= DISABLED_PROBABILITY) { /* disabled person */
                             /* Set arrival for Block 2 */
                             update_next_event(2, arrival, 0);
@@ -211,7 +214,7 @@ int main() {
                    and if there are no more arrivals from outside the simulation ends */
                 if ((totExtArrivals == exited) && (get_next_event_time(0) == INFINITY)) { /* If all the jobs have been processed, the simulation ends */
                     printf("\n[ORCHESTRATOR]: All the jobs have been processed, the simulation ends, the orchestrator unlocks and wait all the blocks\n");
-                    printf("[ORCHESTRATOR]: totExtArrivals: %d | exited: %d \n", totExtArrivals, exited);
+                    printf("[ORCHESTRATOR]: totExtArrivals: %d | exited: %d | online tickets: %d\n", totExtArrivals, exited, onlineTickets);
                     
                     endSimulation = 1;
                     block1();
@@ -220,8 +223,8 @@ int main() {
                     block4();
                     block5();   
 
-                    for (int i=0; i<=5; i++)
-                        printf("\n   Block %d: %6.2f | %d", i, globalInfo[i].time, globalInfo[i].eventType);
+                    // for (int i=0; i<=5; i++)
+                    //     printf("\n   Block %d: %6.2f | %d", i, globalInfo[i].time, globalInfo[i].eventType);
 
                 }
             }

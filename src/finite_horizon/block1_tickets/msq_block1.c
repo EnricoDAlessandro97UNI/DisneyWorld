@@ -55,7 +55,6 @@ static long processedJobs = 0;    /* used to count processed jobs       */
 static double area = 0.0; /* time integrated number in the node */
 
 static double depTime = 0.0; /* departure time */
-static int forwarded = 0;
 
 static double service;
 static double lastArrival = 0.0;
@@ -144,7 +143,6 @@ static void init_block() {
     area = 0.0; /* time integrated number in the node */
 
     depTime = 0.0; /* departure time */
-    forwarded = 0;
 
     lastArrival = 0.0;
     totalService = 0.0;
@@ -225,7 +223,7 @@ static void print_statistics() {
     FILE *fp;
 
     printf("\nBLOCK 1 STATISTICS");
-    printf("\n\nfor %ld jobs, forwarded %d\n", processedJobs, forwarded);
+    printf("\n\nfor %ld jobs\n", processedJobs);
     printf("  avg interarrivals .. = %6.6f\n", lastArrival / processedJobs);
     printf("  avg wait ........... = %6.6f\n", area / processedJobs);
     printf("  avg # in node ...... = %6.6f\n", area / t.current);

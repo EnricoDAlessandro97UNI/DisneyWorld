@@ -5,6 +5,8 @@
         "block2_helper.h": "c",
         "math.h": "c",
         "rngs.h": "c",
-        "sem.h": "c"
+        "sem.h": "c",
+        "block5_helper.h": "c",
+        "simulator_helper.h": "c"
     }
 }

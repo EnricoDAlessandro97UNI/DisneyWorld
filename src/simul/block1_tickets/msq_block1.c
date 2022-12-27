@@ -10,7 +10,7 @@
 #include <sys/sem.h>
 #include <math.h>
 
-#include "../infinite_helper.h"
+#include "../simulator_helper.h"
 #include "block1_helper.h"
 
 #ifndef F
@@ -20,6 +20,7 @@
 #endif
 
 #define M1 120
+
 
 /***************************** GLOBAL VARIABLES *************************************/
 
@@ -54,6 +55,7 @@ static double area = 0.0;          /* time integrated number in the node */
 //double tmpArea = 0.0;
 
 static double depTime = 0.0;       /* departure time */
+static int forwarded = 0;
 
 static double service;
 static double lastArrival = 0.0;
@@ -156,7 +158,7 @@ static void process_departure() {
 static void print_statistics() {
     //FILE *fp;
     printf("\nBLOCK 1 STATISTICS:");
-    printf("\n\nfor %ld jobs\n", processedJobs);
+    printf("\n\nfor %ld jobs, forwarded %d\n", processedJobs, forwarded);
     printf("  avg interarrivals .. = %6.6f\n", lastArrival / processedJobs);
     printf("  avg wait ........... = %6.6f\n", area / processedJobs);
     printf("  avg # in node ...... = %6.6f\n", area / t.current);
@@ -225,6 +227,7 @@ void block1()
         //double tmpArea = 0.0;
 
         depTime = 0.0; /* departure time */
+        forwarded = 0;
 
         lastArrival = 0.0;
         totalService = 0.0;
@@ -247,12 +250,6 @@ void block1()
     
     area += (t.next - t.current) * number; /* update integral   */
     t.current = t.next;                    /* advance the clock */
-
-    /* For global wait stats */
-    if (processedJobs == 0) /* stats not yet ready */
-        glblWaitBlockOne = 0.0;
-    else
-        glblWaitBlockOne = area / processedJobs;
 
     if (get_next_event_type(1) == 0) { /* Process an arrival */
         //printf("\nBLOCK1: Processing an arrival...\n");

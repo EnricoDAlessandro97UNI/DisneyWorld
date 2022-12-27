@@ -1,29 +1,25 @@
-#ifndef PROGETTOPMCSN_INFINITE_HELPER_H
-#define PROGETTOPMCSN_INFINITE_HELPER_H
+#ifndef PROGETTOPMCSN_SIMULATOR_HELPER_H
+#define PROGETTOPMCSN_SIMULATOR_HELPER_H
 
 #include <stdio.h>
 #include "rngs.h"
 
-#define REP 256     /* number of repetitions for each interval */
-#define K 128       /* number of batches */
-#define B 1024      /* sampling interval */
-#define N 131072    /* number of jobs to process (N=K*B) */
-
 #define SEED 123456789
-#define START 0.0       /* initial (open the door) */
+#define START 0.0       /* initial (open the door)                                          */
 
 #ifndef F
+#define STOP 36000.0    /* terminal (close the door) time  (Fascia1: 36000) */
 #define INT 2.4     /* interarrivals (1/lambda1) */
 #else
+#define STOP 21600.0    /* terminal (close the door) time  (Fascia2: 21600) */
 #define INT 4.32    /* interarrivals (1/lambda2) */
-#endif   
+#endif 
 
 #define ONLINE_PROBABILITY 0.6
 #define DISABLED_PROBABILITY 0.2
 #define STORAGE_PROBABILITY 0.3
 #define LOST_PROBABILITY 0.9
 
-#define FILENAME_WAIT_GLOBAL "wait_global.dat"
 #define FILENAME_WAIT_BLOCK1 "block1_tickets/wait_block1.dat"
 #define FILENAME_DELAY_BLOCK1 "block1_tickets/delay_block1.dat"
 #define FILENAME_WAIT_BLOCK2 "block2_dis/wait_block2.dat"
@@ -48,6 +44,7 @@ typedef struct departure_info {
     double time;    /* Departure time */
 } departure_info;
 
+
 /* -------------- GLOBAL VARIABLES -------------- */
 extern global_info globalInfo[6];
 extern departure_info departureInfo;
@@ -56,12 +53,6 @@ extern int block4Lost;
 extern int block4ToExit;
 
 extern int endSimulation;
-
-extern double glblWaitBlockOne;
-extern double glblWaitBlockTwo;
-extern double glblWaitBlockThree;
-extern double glblWaitBlockFour;
-extern double glblWaitBlockFive;
 /* ---------------------------------------------- */
 
 double Exponential(double);

@@ -35,6 +35,7 @@ int main() {
     int rep = 1;
 	int blockNumber;
     double arrival = START;
+    int onlineTickets = 0;
     double prob;
     int totExtArrivals = 0;
     int exited = 0;
@@ -65,6 +66,7 @@ int main() {
         init_global_info_structure();
 
         totExtArrivals = 0;
+        onlineTickets = 0;
         exited = 0;
         endSimulation = 0;
         changeConfig = 0;
@@ -100,6 +102,7 @@ int main() {
                         update_next_event(1, arrival, 0);
                     } 
                     else { /* online arrival */
+                        onlineTickets++;
                         if (get_probability() <= DISABLED_PROBABILITY) { /* disabled person */
                             /* Set arrival for Block 2 */
                             update_next_event(2, arrival, 0);
@@ -184,7 +187,8 @@ int main() {
                     break;
 
                 default:
-                    continue;
+                    printf("\n[WARNING]: Default case\n");
+                    exit(-1);
             }
 
             /* Se il blocco che ha appena terminato ha processato
@@ -231,7 +235,7 @@ int main() {
 
                 if ((totExtArrivals == exited) && (get_next_event_time(0) == INFINITY)) { /* If all the jobs have been processed, the simulation ends */
                     printf("\n[ORCHESTRATOR]: All the jobs have been processed, the simulation ends, the orchestrator unlocks and wait all the blocks\n");
-                    printf("[ORCHESTRATOR]: totExtArrivals: %d | exited: %d \n", totExtArrivals, exited);
+                    printf("[ORCHESTRATOR]: totExtArrivals: %d | exited: %d | online tickets: %d\n", totExtArrivals, exited, onlineTickets);
                     goto nextRep;
                 }
             }
@@ -251,7 +255,7 @@ int main() {
         
         printf("\n| ----------------------------------------------------------------------------------------- |\n");
 
-        rep++;  
+        rep++;   
     }
 
     printf("\n");
