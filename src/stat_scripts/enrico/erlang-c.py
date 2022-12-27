@@ -1,10 +1,23 @@
 # Formula Erlang-C e legge di Little per una M/M/m
 
 import math
+#BLOCK 1
+#SERVERS = 20
+#ESI = 120
+#ES = ESI/SERVERS
+#RO = 0.992071428571428
 
-SERVERS = 4
-ES = 0.1667
-RO = 0.666667
+#BLOCK 3
+#SERVERS = 5
+#ESI = 10
+#ES = ESI/SERVERS
+#RO = 0.01384
+
+#BLOCK 4
+SERVERS = 7
+ESI = 60
+ES = ESI/SERVERS
+RO = 0.021599
 
 def fact(n):
     return math.factorial(n)
@@ -54,7 +67,7 @@ if __name__ == '__main__':
 
     print("\nCalcolo E(Tq), E(Nq), E(Ts) ed E(Ns) per una M/M/m dati E(S) e ro:")
 
-    print(f"\n  - p0 = {p0:.6f}")
+    print(f"\n  - p0 = {p0:}")
     print(f"\n  - PQ = {PQ:.6f}")
     print(f"\n  - E(Tq) = {TQ:.6f}")
     print(f"\n  - E(Nq) = {NQ:.6f}")

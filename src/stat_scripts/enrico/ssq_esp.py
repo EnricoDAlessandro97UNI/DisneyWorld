@@ -2,9 +2,9 @@
 
 import math
 
-ES = 0.1667
-RO = 0.666667
-
+ES = 20
+#RO = 1.66668
+RO = 0.0346
 def calculate_TQ():
     return ((RO*ES)/(1-RO))
 
