@@ -199,7 +199,7 @@ int main() {
 
                 /* Check if stats update is needed */
                 if (exited == currentSamplingInterval) {
-                    printf("\n  -> CURRENT SAMPLING: %d\n", currentSamplingInterval);
+                    //printf("\n  -> CURRENT SAMPLING: %d\n", currentSamplingInterval);
                     glblWait = glblWaitBlockOne + glblWaitBlockTwo + glblWaitBlockThree + glblWaitBlockFour + glblWaitBlockFive;
 
                     /* Write stats on file */

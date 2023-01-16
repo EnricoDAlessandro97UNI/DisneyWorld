@@ -5,9 +5,9 @@
 #include "rngs.h"
 
 #define REP 256     /* number of repetitions for each interval */
-#define K 128       /* number of batches */
-#define B 1024      /* sampling interval */
-#define N 131072    /* number of jobs to process (N=K*B) */
+#define K 256       /* number of batches */
+#define B 8192      /* sampling interval */
+#define N 2097152    /* number of jobs to process (N=K*B) */
 
 #define SEED 123456789
 #define START 0.0       /* initial (open the door) */
@@ -19,7 +19,7 @@
 #endif   
 
 #define ONLINE_PROBABILITY 0.6
-#define DISABLED_PROBABILITY 0.2
+#define DISABLED_PROBABILITY 0.1
 #define STORAGE_PROBABILITY 0.3
 #define LOST_PROBABILITY 0.9
 

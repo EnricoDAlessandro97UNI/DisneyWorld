@@ -19,7 +19,7 @@
 #define SERVERS_THREE 4     /* number of servers time slot 2 */
 #endif
 
-#define M3 15
+#define M3 10
 
 /***************************** GLOBAL VARIABLES *************************************/
 
@@ -117,7 +117,7 @@ int find_one_block_three(event_list_three event)
 }
 
 static void process_arrival() {
-    number++;
+    //number++;
     if (number <= SERVERS_THREE) {
         /* se nel sistema ci sono al più tanti job quanti i server allora calcola un tempo di servizio */
         lastArrival = t.current;
@@ -133,7 +133,7 @@ static void process_arrival() {
 
 static void process_departure() {
     processedJobs++;
-    number--; /* il job è stato completato */
+    //number--; /* il job è stato completato */
     s = e;
 
     //printf("\tDeparture: %6.2f\n", event[s].t);
@@ -244,10 +244,12 @@ void block3()
     /* Find next event index */
     if (get_next_event_type(3) == 0) { /* Next event is an arrival */
         t.next = get_next_event_time(3);
+        number++;
     }
     else {  /* Next event is a completition, find the server that has finished */
         e = next_event_block_three(event);
         t.next = event[e].t;                   /* next event time  */
+        number--;
     }
 
     area += (t.next - t.current) * number; /* update integral  */

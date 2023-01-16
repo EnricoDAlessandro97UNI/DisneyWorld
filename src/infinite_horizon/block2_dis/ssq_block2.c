@@ -18,7 +18,7 @@
 #include <sys/sem.h>
 #include "../infinite_helper.h"
 
-#define M2 12
+#define M2 20
 
 
 /***************************** GLOBAL VARIABLES *************************************/
@@ -55,7 +55,7 @@ double get_service_block_two() {
 }
 
 static void process_arrival() {
-    number++;
+    //number++;
     t.arrival = t.current;
     lastArrival = t.arrival;
     if (number == 1)
@@ -65,7 +65,7 @@ static void process_arrival() {
 static void process_departure() {
     depTime = t.current;
     processedJobs++;
-    number--;
+    //number--;
     if (number > 0) {
         t.completion = t.current + get_service_block_two();
     }
@@ -137,6 +137,13 @@ void block2() {
 
     nextEvent = get_next_event_type(2);
     t.next = get_next_event_time(2);  /* next event time */
+
+    if (nextEvent == 0) {
+        number++;
+    }
+    else {
+        number--;
+    }
 
     if (number > 0 && t.next != INFINITY) {  /* update integrals  */
         area.node += (t.next - t.current) * number;

@@ -118,7 +118,7 @@ int find_one_block_one(event_list_one event)
 }
 
 static void process_arrival() {
-    number++;
+    //number++;
     if (number <= SERVERS_ONE) { /* se nel sistema ci sono al più tanti job quanti i server allora calcola un tempo di servizio */
         lastArrival = t.current;
         service = get_service_block_one();
@@ -133,7 +133,7 @@ static void process_arrival() {
 
 static void process_departure() {
     processedJobs++;
-    number--; /* il job è stato completato */
+    //number--; /* il job è stato completato */
     s = e;
 
     //printf("\tDeparture: %6.2f\n", event[s].t);
@@ -239,10 +239,12 @@ void block1()
     /* Find next event index */
     if (get_next_event_type(1) == 0) { /* Next event is an arrival */
         t.next = get_next_event_time(1);
+        number++;
     }
     else {  /* Next event is a completition, find the server that has finished */
         e = next_event_block_one(event);
         t.next = event[e].t;  /* next event time  */
+        number--;
     }
     
     area += (t.next - t.current) * number; /* update integral   */
