@@ -2,11 +2,9 @@
 from statistics import mean
 import sys
 
-K = 256       # number of batches 
-B = 8192      # sampling interval 
-X = 65536
-N = 131072    # number of jobs to process (N=K*B) 
-
+K = 128       # number of batches 
+B = 1024      # sampling interval 
+X = 32768     # number of rows in the file
 
 def calculateMean(content):
 
@@ -30,11 +28,12 @@ def calculateMean(content):
 if __name__ == "__main__":
     
     arguments = sys.argv
-    if (len(arguments) != 2):
-        print("\nUsage: " + arguments[0] + " file_stastistics\n")
+    if (len(arguments) != 3):
+        print("\nUsage: " + arguments[0] + " file_stastistics file_output\n")
         sys.exit()
 
     filename = arguments[1]
+    foutput = arguments[2]
     # open the statistics file in read-only mode
     statistics = open(filename)
     # read the content of the file opened, readlines returns a list of strings
@@ -46,7 +45,7 @@ if __name__ == "__main__":
     listAvg = calculateMean(content)
 
     # create new file
-    newFile = open("wait_global_py.dat", "w")
+    newFile = open(foutput, "w")
     for line in listAvg:
         newFile.write(str(line) + "\n")
     newFile.close()

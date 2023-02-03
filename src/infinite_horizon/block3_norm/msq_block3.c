@@ -14,9 +14,9 @@
 #include "../infinite_helper.h"
 
 #ifndef F
-#define SERVERS_THREE 5     /* number of servers time slot 1 */
+#define SERVERS_THREE 4     /* number of servers time slot 1 */
 #else
-#define SERVERS_THREE 4     /* number of servers time slot 2 */
+#define SERVERS_THREE 3     /* number of servers time slot 2 */
 #endif
 
 #define M3 10
@@ -60,6 +60,11 @@ static double lastArrival = 0.0;
 static double totalService = 0.0;
 static double avgService = 0.0;
 static double totalUtilization = 0.0;
+
+static double avgnode = 0.0;
+static double avgqueue = 0.0;
+
+static FILE *fp;
 /************************************************************************************/
 
 double get_service_block_three(void) {
@@ -120,7 +125,6 @@ static void process_arrival() {
     //number++;
     if (number <= SERVERS_THREE) {
         /* se nel sistema ci sono al più tanti job quanti i server allora calcola un tempo di servizio */
-        lastArrival = t.current;
         service = get_service_block_three();
         s = find_one_block_three(event); 
         sum[s].service += service;
@@ -128,7 +132,6 @@ static void process_arrival() {
         event[s].t = t.current + service; /* Aggiorna l'istante del prossimo evento su quel server (partenza) */
         event[s].x = 1;
     }
-    lastArrival = t.current;
 }
 
 static void process_departure() {
@@ -158,7 +161,6 @@ static void process_departure() {
 }
 
 static void print_statistics() {
-    //FILE *fp;
     printf("\nBLOCK 3 STATISTICS:");
 
     printf("\n\nfor %ld jobs\n", processedJobs);
@@ -167,15 +169,16 @@ static void print_statistics() {
     printf("  avg # in node ...... = %6.2f\n", area / t.current);
 
     /* Write statistics on file */
-    // fp = fopen(FILENAME_WAIT_BLOCK3, "a");
-    // fprintf(fp,"%6.6f\n", area / processedJobs);
-    // fclose(fp);
+    fp = fopen(FILENAME_WAIT_BLOCK3, "a");
+    fprintf(fp,"%6.6f\n", area / processedJobs);
+    fclose(fp);
 
     for (s = 0; s < SERVERS_THREE; s++)     /* adjust area to calculate */
         area -= sum[s].service;              /* averages for the queue   */
 
     printf("  avg delay .......... = %6.2f\n", area / processedJobs);
     printf("  avg # in queue ..... = %6.2f\n", area / t.current);
+
     printf("\nthe server statistics are:\n\n");
     printf("    server     utilization     avg service        share\n");
     for (s = 0; s < SERVERS_THREE; s++) {
@@ -192,9 +195,9 @@ static void print_statistics() {
     printf("   avg utilization .... = %6.6f\n", totalUtilization / SERVERS_THREE);
 
     /* Write statistics on file */
-    // fp = fopen(FILENAME_DELAY_BLOCK3, "a");
-    // fprintf(fp,"%6.6f\n", area / processedJobs);
-    // fclose(fp);
+    fp = fopen(FILENAME_DELAY_BLOCK3, "a");
+    fprintf(fp,"%6.6f\n", area / processedJobs);
+    fclose(fp);
 
     printf("\n");
 }
@@ -206,6 +209,9 @@ void block3()
         /* Initialize arrival event */
         t.current = START;
 
+        avgnode = 0.0;
+        avgqueue = 0.0;
+
         /* Initialize server status */
         for (s = 0; s < SERVERS_THREE; s++)
         {
@@ -215,6 +221,33 @@ void block3()
             sum[s].served = 0;
         }
         init = 0;
+    }
+
+    /* Sampling avgnode and avgqueue */
+    if (sampling == 1) {
+
+        /* For global wait stats */
+        if (processedJobs == 0) /* stats not yet ready */ {
+            fp = fopen(FILENAME_AVGNODE_BLOCK3, "a");
+            fprintf(fp,"%6.6f\n", avgnode);
+            fclose(fp);
+            fp = fopen(FILENAME_AVGQUEUE_BLOCK3, "a");
+            fprintf(fp,"%6.6f\n", avgqueue);
+            fclose(fp);
+        }
+        else {
+            fp = fopen(FILENAME_AVGNODE_BLOCK3, "a");
+            fprintf(fp,"%6.6f\n", area / t.current);
+            fclose(fp);
+            int tmpArea = area;
+            for (s = 0; s < SERVERS_THREE; s++) /* adjust area to calculate */
+                tmpArea -= sum[s].service;        /* averages for the queue   */
+            fp = fopen(FILENAME_AVGQUEUE_BLOCK3, "a");
+            fprintf(fp,"%6.6f\n", tmpArea / t.current);
+            fclose(fp);
+        }
+            
+        return;
     }
 
     /* Check for the end of the simulation */
@@ -245,6 +278,7 @@ void block3()
     if (get_next_event_type(3) == 0) { /* Next event is an arrival */
         t.next = get_next_event_time(3);
         number++;
+        lastArrival = t.next;
     }
     else {  /* Next event is a completition, find the server that has finished */
         e = next_event_block_three(event);

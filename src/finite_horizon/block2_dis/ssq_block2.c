@@ -37,6 +37,9 @@ static double lastArrival = 0.0;
 
 static int nextEvent;        /* Next event type */
 static double depTime = 0;
+
+static double avgnode = 0.0;
+static FILE *fp;
 /************************************************************************************/
 
 double get_service_block_two() {
@@ -59,6 +62,8 @@ static void init_block() {
     lastArrival = 0.0;
 
     depTime = 0;
+
+    avgnode = 0.0;
 
     init = 0;
 }
@@ -92,8 +97,6 @@ static void process_departure() {
 
 static void print_statistics() {
 
-    FILE *fp;
-
     printf("\nBLOCK 2 STATISTICS");
     
     printf("\nfor %ld jobs\n", processedJobs);
@@ -121,6 +124,24 @@ void block2() {
     if (init == 1) {
         init_block();
     }
+
+    /* Sampling avgnode and avgqueue */
+    if (sampling == 1) {
+
+        /* For global wait stats */
+        if (processedJobs == 0) /* stats not yet ready */ {
+            fp = fopen(FILENAME_AVGNODE_BLOCK2, "a");
+            fprintf(fp,"%6.6f\n", avgnode);
+            fclose(fp);
+        }
+        else {
+            fp = fopen(FILENAME_AVGNODE_BLOCK2, "a");
+            fprintf(fp,"%6.6f\n", area.node / t.current);
+            fclose(fp);
+        }
+            
+        return;
+    }
     
     /* Check for the end of the simulation */
     if (endSimulation == 1) 
@@ -134,6 +155,7 @@ void block2() {
 
     /* Check for server configuration changes */
     if (changeConfig == 1) {
+        print_statistics();
         return;
     }
 

@@ -79,7 +79,7 @@ GUADAGNI
 PERCENTUALI
 	- acquisto biglietto online: 60%	
 	- acquisto in cassa: 40%
-	- disabili: 20%
+	- disabili: 10%
 	- altri arrivi: 80%
 	- deposito: 30%
 	- lasciati passare:  60%

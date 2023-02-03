@@ -46,6 +46,11 @@ static double lastArrival = 0.0;
 
 static int nextEvent;        /* Next event type */
 static double depTime = 0;
+
+static double avgnode = 0.0;
+static double avgqueue = 0.0;
+
+static FILE *fp;
 /************************************************************************************/
 
 
@@ -78,8 +83,6 @@ static void process_departure() {
 }
 
 static void print_statistics() {
-    //FILE *fp;
-
     printf("\nBLOCK 2 STATISTICS:");
 
     printf("\nfor %ld jobs\n", processedJobs);
@@ -92,13 +95,13 @@ static void print_statistics() {
     printf("   utilization ............. = %6.2f\n", area.service / t.current);
 
     /* Write statistics on files */
-    // fp = fopen(FILENAME_WAIT_BLOCK2, "a");
-    // fprintf(fp,"%6.6f\n", area.node / processedJobs);
-    // fclose(fp);
+    fp = fopen(FILENAME_WAIT_BLOCK2, "a");
+    fprintf(fp,"%6.6f\n", area.node / processedJobs);
+    fclose(fp);
 
-    // fp = fopen(FILENAME_DELAY_BLOCK2, "a");
-    // fprintf(fp,"%6.6f\n", area.queue / processedJobs);
-    // fclose(fp);
+    fp = fopen(FILENAME_DELAY_BLOCK2, "a");
+    fprintf(fp,"%6.6f\n", area.queue / processedJobs);
+    fclose(fp);
 }
 
 void block2() {
@@ -110,7 +113,34 @@ void block2() {
         t.arrival = INFINITY;           /* schedule the first arrival            */
         t.completion = INFINITY;        /* the first event can't be a completion */
 
+        avgnode = 0.0;
+        avgqueue = 0.0;
+
         init = 0;
+    }
+
+    /* Sampling avgnode and avgqueue */
+    if (sampling == 1) {
+
+        /* For global wait stats */
+        if (processedJobs == 0) /* stats not yet ready */ {
+            fp = fopen(FILENAME_AVGNODE_BLOCK2, "a");
+            fprintf(fp,"%6.6f\n", avgnode);
+            fclose(fp);
+            fp = fopen(FILENAME_AVGQUEUE_BLOCK2, "a");
+            fprintf(fp,"%6.6f\n", avgqueue);
+            fclose(fp);
+        }
+        else {
+            fp = fopen(FILENAME_AVGNODE_BLOCK2, "a");
+            fprintf(fp,"%6.6f\n", area.node / t.current);
+            fclose(fp);
+            fp = fopen(FILENAME_AVGQUEUE_BLOCK2, "a");
+            fprintf(fp,"%6.6f\n", area.queue / t.current);
+            fclose(fp);
+        }
+            
+        return;
     }
 
     /* Check for the end of the simulation */

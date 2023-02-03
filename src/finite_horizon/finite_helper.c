@@ -47,6 +47,16 @@ void create_statistics_files() {
     fclose(fp);
     fp = fopen(FILENAME_WAIT_BLOCK5, "w");
     fclose(fp);
+    fp = fopen(FILENAME_AVGNODE_BLOCK1, "w");
+    fclose(fp);
+    fp = fopen(FILENAME_AVGNODE_BLOCK2, "w");
+    fclose(fp);
+    fp = fopen(FILENAME_AVGNODE_BLOCK3, "w");
+    fclose(fp);
+    fp = fopen(FILENAME_AVGNODE_BLOCK4, "w");
+    fclose(fp);
+    fp = fopen(FILENAME_AVGNODE_BLOCK5, "w");
+    fclose(fp);
 }
 
 /* Initializes the initial state of the global_info structure  */

@@ -26,6 +26,8 @@ double glblWaitBlockTwo;
 double glblWaitBlockThree;
 double glblWaitBlockFour;
 double glblWaitBlockFive;
+
+int sampling;
 /* ----------------------------------------------- */
 
 int main() {
@@ -79,7 +81,9 @@ int main() {
         glblWaitBlockTwo = 0.0;
         glblWaitBlockThree = 0.0;
         glblWaitBlockFour = 0.0;
-        glblWaitBlockFive = 0.0;    
+        glblWaitBlockFive = 0.0;   
+
+        sampling = 0; 
 
         /* Set first external arrival and departure info */
         arrival = START;
@@ -155,6 +159,14 @@ int main() {
                     //fp = fopen(FILENAME_WAIT_GLOBAL, "a");
                     fprintf(fp,"%6.6f\n", glblWait);
                     //fclose(fp);
+
+                    sampling = 1;
+                    block1();
+                    block2();
+                    block3();
+                    block4();
+                    block5();
+                    sampling = 0;
 
                     counter++;
                     currentSamplingInterval = SAMPLING*counter;

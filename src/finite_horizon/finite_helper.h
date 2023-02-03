@@ -16,22 +16,26 @@
 #define MAX_SERVERS 100
 
 #define ONLINE_PROBABILITY 0.6
-#define DISABLED_PROBABILITY 0.2
+#define DISABLED_PROBABILITY 0.25
 #define STORAGE_PROBABILITY 0.3
 #define LOST_PROBABILITY 0.9
 
-#define FILENAME_WAIT_GLOBAL "wait_global.dat"
-#define FILENAME_WAIT_BLOCK1 "block1_tickets/wait_block1.dat"
-#define FILENAME_DELAY_BLOCK1 "block1_tickets/delay_block1.dat"
-#define FILENAME_WAIT_BLOCK2 "block2_dis/wait_block2.dat"
-#define FILENAME_DELAY_BLOCK2 "block2_dis/delay_block2.dat"
-#define FILENAME_WAIT_BLOCK3 "block3_norm/wait_block3.dat"
-#define FILENAME_DELAY_BLOCK3 "block3_norm/delay_block3.dat"
-#define FILENAME_WAIT_BLOCK4 "block4_contr/wait_block4.dat"
-#define FILENAME_DELAY_BLOCK4 "block4_contr/delay_block4.dat"
-#define FILENAME_WAIT_BLOCK5 "block5_storage/wait_block5.dat"
-#define FILENAME_DELAY_BLOCK5 "block5_storage/delay_block5.dat"
-
+#define FILENAME_WAIT_GLOBAL "stats/wait_global.dat"
+#define FILENAME_WAIT_BLOCK1 "stats/wait_block1.dat"
+#define FILENAME_DELAY_BLOCK1 "stats/delay_block1.dat"
+#define FILENAME_WAIT_BLOCK2 "stats/wait_block2.dat"
+#define FILENAME_DELAY_BLOCK2 "stats/delay_block2.dat"
+#define FILENAME_WAIT_BLOCK3 "stats/wait_block3.dat"
+#define FILENAME_DELAY_BLOCK3 "stats/delay_block3.dat"
+#define FILENAME_WAIT_BLOCK4 "stats/wait_block4.dat"
+#define FILENAME_DELAY_BLOCK4 "stats/delay_block4.dat"
+#define FILENAME_WAIT_BLOCK5 "stats/wait_block5.dat"
+#define FILENAME_DELAY_BLOCK5 "stats/delay_block5.dat"
+#define FILENAME_AVGNODE_BLOCK1 "stats/avgnode_block1.dat"
+#define FILENAME_AVGNODE_BLOCK2 "stats/avgnode_block2.dat"
+#define FILENAME_AVGNODE_BLOCK3 "stats/avgnode_block3.dat"
+#define FILENAME_AVGNODE_BLOCK4 "stats/avgnode_block4.dat"
+#define FILENAME_AVGNODE_BLOCK5 "stats/avgnode_block5.dat"
 
 /* Structure used to handle global event times */
 typedef struct global_info {
@@ -60,6 +64,8 @@ extern double glblWaitBlockTwo;
 extern double glblWaitBlockThree;
 extern double glblWaitBlockFour;
 extern double glblWaitBlockFive;
+
+extern int sampling;
 /* ---------------------------------------------- */
 
 double Exponential(double);

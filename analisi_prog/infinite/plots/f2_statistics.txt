@@ -1,0 +1,121 @@
+POP NODE
+
+avgnode_block1_py.dat
+
+based upon 128 data points and with 95% confidence
+the expected value is in the interval     20.18 +/-   0.18
+---------------------
+avgnode_block2_py.dat
+
+based upon 128 data points and with 95% confidence
+the expected value is in the interval      1.23 +/-   0.50
+---------------------
+avgnode_block3_py.dat
+
+based upon 128 data points and with 95% confidence
+the expected value is in the interval      3.27 +/-   0.70
+---------------------
+avgnode_block4_py.dat
+
+based upon 128 data points and with 95% confidence
+the expected value is in the interval     23.72 +/-   0.20
+---------------------
+avgnode_block5_py.dat
+
+based upon 128 data points and with 95% confidence
+the expected value is in the interval      7.25 +/-   0.02
+---------------------
+---------------------
+
+POP QUEUE
+avgqueue_block1_py.dat
+
+based upon 128 data points and with 95% confidence
+the expected value is in the interval      9.07 +/-   2.0
+---------------------
+avgqueue_block2_py.dat
+
+based upon 128 data points and with 95% confidence
+the expected value is in the interval      0.40 +/-   0.02
+---------------------
+avgqueue_block3_py.dat
+
+based upon 128 data points and with 95% confidence
+the expected value is in the interval      1.19 +/-   0.50
+---------------------
+avgqueue_block4_py.dat
+
+based upon 128 data points and with 95% confidence
+the expected value is in the interval      6.38 +/-   0.10
+---------------------
+avgqueue_block5_py.dat
+
+based upon 128 data points and with 95% confidence
+the expected value is in the interval      3.09 +/-   0.02
+---------------------
+---------------------
+
+DELAY
+
+delay_block1.dat
+
+based upon 256 data points and with 95% confidence
+the expected value is in the interval     87.95 +/-   1.97
+---------------------
+delay_block2.dat
+
+based upon 256 data points and with 95% confidence
+the expected value is in the interval     17.15 +/-   0.10
+---------------------
+delay_block3.dat
+
+based upon 256 data points and with 95% confidence
+the expected value is in the interval      5.70 +/-   2.02
+---------------------
+delay_block4.dat
+
+based upon 256 data points and with 95% confidence
+the expected value is in the interval     27.94 +/-   0.35
+---------------------
+delay_block5.dat
+
+based upon 256 data points and with 95% confidence
+the expected value is in the interval     44.75 +/-   0.43
+---------------------
+---------------------
+
+WAIT
+
+wait_block1.dat
+
+based upon 256 data points and with 95% confidence
+the expected value is in the interval    217.94 +/-   2.01
+---------------------
+wait_block2.dat
+
+based upon 256 data points and with 95% confidence
+the expected value is in the interval     53.00 +/-   2.00
+---------------------
+wait_block3.dat
+
+based upon 256 data points and with 95% confidence
+the expected value is in the interval     15.70 +/-   2.02
+---------------------
+wait_block4.dat
+
+based upon 256 data points and with 95% confidence
+the expected value is in the interval    102.94 +/-   0.37
+---------------------
+wait_block5.dat
+
+based upon 256 data points and with 95% confidence
+the expected value is in the interval    104.72 +/-   0.45
+---------------------
+---------------------
+
+GLOBAL
+wait_global_py.dat
+
+based upon 128 data points and with 95% confidence
+the expected value is in the interval    494.30 +/-   5.01
+---------------------

@@ -25,6 +25,8 @@ double glblWaitBlockTwo;
 double glblWaitBlockThree;
 double glblWaitBlockFour;
 double glblWaitBlockFive;
+
+double sampling;
 /* ----------------------------------------------- */
 
 int main() {
@@ -69,7 +71,9 @@ int main() {
         onlineTickets = 0;
         exited = 0;
         endSimulation = 0;
-        
+
+        sampling = 0;
+
         block4Lost = 0;
         block4ToExit = 0;
 
@@ -91,6 +95,8 @@ int main() {
 
         while (1) {
             
+            sampling = 0;
+
             blockNumber = get_next_event();  /* Takes the index of the block with the most imminent event */
             switch (blockNumber) {
                 
@@ -205,6 +211,14 @@ int main() {
                     /* Write stats on file */
                     fprintf(fp,"%6.6f\n", glblWait);
                     
+                    sampling = 1;
+                    block1();
+                    block2();
+                    block3();
+                    block4();
+                    block5();
+                    sampling = 0;
+
                     /* update next sampling */
                     counter++;
                     currentSamplingInterval = B*counter;
