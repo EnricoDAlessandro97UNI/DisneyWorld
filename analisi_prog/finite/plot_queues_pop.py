@@ -2,12 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-arguments = sys.argv
-if (len(arguments) != 2):
-    print("\nUsage: " + arguments[0] + " file_stastistics\n")
-    sys.exit()
-
-path = arguments[1]
+path = "stats"
 
 # y axis values
 y1 = []
@@ -61,7 +56,7 @@ plt.axhline(y = 6.48066945093441, color = 'violet', linestyle="dashdot")
 plt.axhline(y = 3.120083146896389, color = 'gray', linestyle="dashdot")
 
 
-
+plt.title("Queues population")
 
 
 plt.plot(x, y1, label='Block1 queue population', color = 'r')
@@ -76,7 +71,9 @@ plt.xlabel('x - batches')
 # naming the y axis
 plt.ylabel('y - Queue population')
 
-plt.show()
+plt.tight_layout()
+#plt.show()
+plt.savefig('queues_pop.png')
 
 
 

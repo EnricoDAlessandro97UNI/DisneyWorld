@@ -2,12 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-arguments = sys.argv
-if (len(arguments) != 2):
-    print("\nUsage: " + arguments[0] + " file_stastistics\n")
-    sys.exit()
-
-path = arguments[1]
+path = "stats"
 
 # y axis values
 y1 = []
@@ -57,7 +52,7 @@ x = np.arange(0, 57600/100)
 plt.axvline(x = 36000/100, color = 'y', linestyle="dashdot", label='Change Slot Time (10h)')
 plt.axvline(x = 57600/100, color = 'black', linestyle="dashdot", label='End (16h)')
 
-
+plt.title("Nodes population")
 
 
 plt.plot(x, y1, label='Block1 population', color = 'r')
@@ -72,6 +67,7 @@ plt.xlabel('x - Samplings')
 # naming the y axis
 plt.ylabel('y - Node population')
 
-plt.show()
-
+plt.tight_layout()
+#plt.show()
+plt.savefig('node_pop.png')
 

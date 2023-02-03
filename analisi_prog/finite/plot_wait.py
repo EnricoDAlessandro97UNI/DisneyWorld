@@ -5,13 +5,7 @@ import numpy as np
   
 
 
-
-arguments = sys.argv
-if (len(arguments) != 2):
-    print("\nUsage: " + arguments[0] + " file_stastistics\n")
-    sys.exit()
-
-filename = arguments[1]
+filename = "stats/wait_global_py.dat"
 
 # y axis values
 y = []
@@ -30,7 +24,7 @@ plt.axvline(x = 57600/100, color = 'black', linestyle="dashdot", label='End')
 plt.axhline(y = 600, color = 'r', linestyle="dashdot", label='QoS')
 
 
-
+plt.title("Global wait")
 
 
 # plotting the points 
@@ -44,4 +38,6 @@ plt.ylabel('y - Response time (s)')
 
 plt.legend(bbox_to_anchor = (1.0, 1), loc = 'lower center') 
 # function to show the plot
-plt.show()
+plt.tight_layout()
+#plt.show()
+plt.savefig('wait_global.png')

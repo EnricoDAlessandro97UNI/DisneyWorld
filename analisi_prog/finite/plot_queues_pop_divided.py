@@ -2,12 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-arguments = sys.argv
-if (len(arguments) != 2):
-    print("\nUsage: " + arguments[0] + " file_stastistics\n")
-    sys.exit()
-
-path = arguments[1]
+path = "stats"
 
 # y axis values
 y1 = []

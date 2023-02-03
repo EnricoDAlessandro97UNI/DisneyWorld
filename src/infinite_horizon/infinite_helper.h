@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include "rngs.h"
 
-#define REP 256     /* number of repetitions for each interval (256) */
+#define REP 1     /* number of repetitions for each interval (256) */
 #define K 128       /* number of batches */
 #define B 1024      /* sampling interval */
 #define N 131072    /* number of jobs to process (N=K*B) */
