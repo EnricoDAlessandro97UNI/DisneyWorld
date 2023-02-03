@@ -1,121 +1,105 @@
-POP NODE
-
 avgnode_block1_py.dat
 
 based upon 128 data points and with 95% confidence
-the expected value is in the interval     20.18 +/-   0.18
+the expected value is in the interval     19.88 +/-   0.90
 ---------------------
 avgnode_block2_py.dat
 
 based upon 128 data points and with 95% confidence
-the expected value is in the interval      1.23 +/-   0.50
+the expected value is in the interval      1.91 +/-   0.20
 ---------------------
 avgnode_block3_py.dat
 
 based upon 128 data points and with 95% confidence
-the expected value is in the interval      3.27 +/-   0.70
+the expected value is in the interval      2.31 +/-   0.20
 ---------------------
 avgnode_block4_py.dat
 
 based upon 128 data points and with 95% confidence
-the expected value is in the interval     23.72 +/-   0.20
+the expected value is in the interval     23.75 +/-   0.15
 ---------------------
 avgnode_block5_py.dat
 
 based upon 128 data points and with 95% confidence
-the expected value is in the interval      7.25 +/-   0.02
+the expected value is in the interval      7.23 +/-   0.04
 ---------------------
----------------------
-
-POP QUEUE
 avgqueue_block1_py.dat
 
 based upon 128 data points and with 95% confidence
-the expected value is in the interval      9.07 +/-   2.0
+the expected value is in the interval      8.79 +/-   0.90
 ---------------------
 avgqueue_block2_py.dat
 
 based upon 128 data points and with 95% confidence
-the expected value is in the interval      0.40 +/-   0.02
+the expected value is in the interval      0.76 +/-   0.20
 ---------------------
 avgqueue_block3_py.dat
 
 based upon 128 data points and with 95% confidence
-the expected value is in the interval      1.19 +/-   0.50
+the expected value is in the interval      0.58 +/-   0.20
 ---------------------
 avgqueue_block4_py.dat
 
 based upon 128 data points and with 95% confidence
-the expected value is in the interval      6.38 +/-   0.10
+the expected value is in the interval      6.40 +/-   0.15
 ---------------------
 avgqueue_block5_py.dat
 
 based upon 128 data points and with 95% confidence
-the expected value is in the interval      3.09 +/-   0.02
+the expected value is in the interval      3.08 +/-   0.04
 ---------------------
----------------------
-
-DELAY
-
 delay_block1.dat
 
 based upon 256 data points and with 95% confidence
-the expected value is in the interval     87.95 +/-   1.97
+the expected value is in the interval     87.67 +/-   1.87
 ---------------------
 delay_block2.dat
 
 based upon 256 data points and with 95% confidence
-the expected value is in the interval     17.15 +/-   0.10
+the expected value is in the interval     10.09 +/-   0.05
 ---------------------
 delay_block3.dat
 
 based upon 256 data points and with 95% confidence
-the expected value is in the interval      5.70 +/-   2.02
+the expected value is in the interval      3.33 +/-   0.90
 ---------------------
 delay_block4.dat
 
 based upon 256 data points and with 95% confidence
-the expected value is in the interval     27.94 +/-   0.35
+the expected value is in the interval     27.97 +/-   0.34
 ---------------------
 delay_block5.dat
 
 based upon 256 data points and with 95% confidence
-the expected value is in the interval     44.75 +/-   0.43
+the expected value is in the interval     44.68 +/-   0.46
 ---------------------
----------------------
-
-WAIT
-
 wait_block1.dat
 
 based upon 256 data points and with 95% confidence
-the expected value is in the interval    217.94 +/-   2.01
+the expected value is in the interval    207.67 +/-   1.95
 ---------------------
 wait_block2.dat
 
 based upon 256 data points and with 95% confidence
-the expected value is in the interval     53.00 +/-   2.00
+the expected value is in the interval     30.08 +/-   0.06
 ---------------------
 wait_block3.dat
 
 based upon 256 data points and with 95% confidence
-the expected value is in the interval     15.70 +/-   2.02
+the expected value is in the interval     13.33 +/-   0.8
 ---------------------
 wait_block4.dat
 
 based upon 256 data points and with 95% confidence
-the expected value is in the interval    102.94 +/-   0.37
+the expected value is in the interval    102.97 +/-   0.35
 ---------------------
 wait_block5.dat
 
 based upon 256 data points and with 95% confidence
-the expected value is in the interval    104.72 +/-   0.45
+the expected value is in the interval    104.65 +/-   0.48
 ---------------------
----------------------
-
-GLOBAL
 wait_global_py.dat
 
 based upon 128 data points and with 95% confidence
-the expected value is in the interval    494.30 +/-   5.01
+the expected value is in the interval    468.73 +/-   1.22
 ---------------------
