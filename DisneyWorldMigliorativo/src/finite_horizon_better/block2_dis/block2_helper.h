@@ -1,0 +1,6 @@
+#ifndef PROGETTOPMCSN_BLOCK2_HELPER_H
+#define PROGETTOPMCSN_BLOCK2_HELPER_H
+
+void block2();
+
+#endif 

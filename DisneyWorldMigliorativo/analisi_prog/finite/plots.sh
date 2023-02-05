@@ -1,0 +1,4 @@
+python3 plot_blocks_pop.py
+python3 plot_wait.py
+python3 plot_blocks_pop_classes.py
+python3 plot_wait_classes.py
