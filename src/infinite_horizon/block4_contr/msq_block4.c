@@ -14,12 +14,12 @@
 #include "../infinite_helper.h"
 
 #ifndef F
-#define SERVERS_FOUR 33     /* number of servers time slot 1 */
+#define SERVERS_FOUR 51     /* number of servers time slot 1 */
 #else
-#define SERVERS_FOUR 19     /* number of servers time slot 2 */
+#define SERVERS_FOUR 25     /* number of servers time slot 2 */
 #endif
 
-#define M4 75
+#define M4 120
 
 
 /***************************** GLOBAL VARIABLES *************************************/
